@@ -22,7 +22,7 @@ var aboutController = require('./controllers/about');
 var app = express();
 
 
-mongoose.connect(process.env.MONGODB);
+mongoose.connect("localhost" || process.env.MONGODB);
 mongoose.connection.on('error', function() {
   console.log('MongoDB Connection Error. Please make sure that MongoDB is running.');
   process.exit(1);
