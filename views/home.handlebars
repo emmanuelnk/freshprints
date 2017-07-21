@@ -1,0 +1,35 @@
+<div class="container-fluid">
+  {{#if messages.success}}
+    <div role="alert" class="alert alert-success">
+      {{#each messages.success}}
+        <div>{{msg}}</div>
+      {{/each}}
+    </div>
+  {{/if}}
+  {{#if messages.error}}
+    <div role="alert" class="alert alert-danger">
+      {{#each messages.error}}
+        <div>{{msg}}</div>
+      {{/each}}
+    </div>
+  {{/if}}
+  {{#if messages.info}}
+    <div role="alert" class="alert alert-info">
+      {{#each messages.info}}
+        <div>{{msg}}</div>
+      {{/each}}
+    </div>
+  {{/if}}
+  <div class="row">
+    <div class="col-sm-12 col-md-6">
+      <div class="panel">
+        <div class="panel-body">
+          <h3>Drop Images</h3>
+            <form action="/file-upload"
+                  class="dropzone"
+                  id="my-awesome-dropzone"></form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
