@@ -56,10 +56,16 @@ app.use(session({ secret: process.env.SESSION_SECRET, resave: true, saveUninitia
 app.use(flash());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// view controllers
 app.get('/', HomeController.index);
 app.get('/contact', contactController.contactGet);
 app.get('/about', aboutController.contactGet);
 app.post('/contact', contactController.contactPost);
+
+// app requests
+app.post('/file-upload', function (req, res) {
+  console.log(req.body);
+});
 
 // Production error handler
 if (app.get('env') === 'production') {
