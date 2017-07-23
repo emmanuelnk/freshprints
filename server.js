@@ -129,10 +129,10 @@ app.post("/file-upload", multer.single("file"), (req, res, next) => {
         }).then(function (resp) {
             // console.log(resp.data);
             res.status(200).send(resp.data);
-            axios.delete(`https://www.googleapis.com/storage/v1/b/${bucket.name}/o/${blob.name}`).then(function(){
-
-            },function(){
-
+            axios.delete(`https://www.googleapis.com/storage/v1/b/${bucket.name}/o/${blob.name}`).then(function(res){
+                // console.log(res);
+            },function(err){
+                console.log(err);
             });
         }, function (error) {
             res.status(400).send(error);
