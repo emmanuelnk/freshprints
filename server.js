@@ -2,6 +2,8 @@ const express = require("express");
 const path = require("path");
 const logger = require("morgan");
 const axios = require("axios");
+const _ = require("underscore");
+const extend = require('extend');
 const compression = require("compression");
 const methodOverride = require("method-override");
 const session = require("express-session");
@@ -22,15 +24,17 @@ const multer = Multer({
 // Load environment variables from .env file
 dotenv.load();
 
-// Google
+// -------------    Google Cloud APIs  ---------------------
 //API_key
 const API_key = require("./sensitive/API_key");
 const Storage = require("@google-cloud/storage");
+const Vision = require('@google-cloud/vision');
 // Instantiate a storage client
 const storage = Storage();
+const vision = Vision();
 // A bucket is a container for objects (files).
 const bucket = storage.bucket(process.env.GCLOUD_STORAGE_BUCKET);
-
+// ----------------------  END ----------------------------
 
 // Controllers
 const HomeController = require("./controllers/home");
@@ -111,31 +115,44 @@ app.post("/file-upload", multer.single("file"), (req, res, next) => {
         // The public URL can be used to directly access the file via HTTP.
         const publicUrl = format(`https://storage.googleapis.com/${bucket.name}/${blob.name}`);
         // res.status(200).send(publicUrl);
-        axios.post("https://vision.googleapis.com/v1/images:annotate?key=" + API_key.key, {
-            "requests": [
-                {
-                    "image": {
-                        "source": {
-                            "gcsImageUri": `gs://${bucket.name}/${blob.name}`
-                        }
-                    },
-                    "features": [
-                        {
-                            "type": "IMAGE_PROPERTIES"
-                        }
-                    ]
-                }
-            ]
-        }).then(function (resp) {
-            // console.log(resp.data);
-            res.status(200).send(resp.data);
-            axios.delete(`https://www.googleapis.com/storage/v1/b/${bucket.name}/o/${blob.name}`).then(function(res){
-                // console.log(res);
-            },function(err){
-                console.log(err);
-            });
-        }, function (error) {
-            res.status(400).send(error);
+
+        // Build the vision object
+        let visionObj = {};
+
+        vision.detectFaces(storage.bucket(bucket.name).file(blob.name)).then((results) => {
+            visionObj.cloudFileName = blob.name;
+            visionObj.faces = results;
+            return vision.detectLogos(storage.bucket(bucket.name).file(blob.name))
+        }).then((results) => {
+            visionObj.logos = results;
+            console.log(visionObj);
+            return vision.detectLandmarks(storage.bucket(bucket.name).file(blob.name));
+        }).then((results) => {
+            visionObj.landmarks = results;
+            console.log(visionObj);
+            return vision.detectText(storage.bucket(bucket.name).file(blob.name));
+        }).then((results) => {
+            visionObj.text = results;
+            console.log(visionObj);
+            return vision.detectProperties(storage.bucket(bucket.name).file(blob.name));
+        }).then((results) => {
+            visionObj.properties = results;
+            console.log(visionObj);
+            res.status(200).send(visionObj);
+
+            // then delete the file from the bucket because we no longer need it
+            storage
+                .bucket(bucket.name)
+                .file(blob.name)
+                .delete()
+                .then(() => {
+                    console.log(`gs://${bucket.name}/${blob.name} deleted.`);
+                })
+                .catch((err) => {
+                    console.error('ERROR:', err);
+                });
+        }).catch((err) => {
+            console.error('ERROR:', err);
         });
 
     });

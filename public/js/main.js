@@ -3,7 +3,9 @@ $(function() {
     // Dropzone config
 
     function formatJsonToHtml (obj) {
-        $("#image-props").append(renderjson(obj));
+        $("#image-props")
+        .append('<h5 style="font-style:italic;font-weight:400;">'+ obj.cloudFileName + '</h5>')
+        .append(renderjson(obj));
     }
 
     Dropzone.options.myAwesomeDropzone = {
@@ -28,7 +30,8 @@ $(function() {
 
             // Success
             self.on('success', function( file, resp ){
-                formatJsonToHtml(resp.responses);
+                console.log(resp);
+                formatJsonToHtml(resp);
             });
 
             // File upload Progress
