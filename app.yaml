@@ -1,2 +1,9 @@
+# [START app_yaml]
 env: flex
 runtime: nodejs
+
+# [START env]
+env_variables:
+  GCLOUD_STORAGE_BUCKET: freshprints_bucket
+# [END env]
+# [END app_yaml]

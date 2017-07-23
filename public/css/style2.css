@@ -317,7 +317,7 @@ table {
 
 .dropzone {
     border: 2px dashed #0087F7;
-    height: 200px;
+    height: auto;
     border-radius: 5px;
     background: white; }
 .dropzone .dz-message {
@@ -710,9 +710,9 @@ main table p {
 footer {
     background: #2D3038;
     z-index: 5000;
-    position: absolute;
+    position: fixed;
     display: block;
-    padding: 1.4rem 1.4rem 2.8rem 1.4rem;
+    padding: 0;
     font-size: 0.9rem;
     color: white; }
 footer * {

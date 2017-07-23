@@ -1,9 +1,13 @@
 $(function() {
   // Your custom JavaScript goes here
-
     // Dropzone config
+
+    function formatJsonToHtml (obj) {
+        $("#image-props").append(renderjson(obj));
+    }
+
     Dropzone.options.myAwesomeDropzone = {
-        maxFilesize: 5,
+        maxFilesize: 500,
         addRemoveLinks: true,
         dictResponseError: 'Server not Configured',
         acceptedFiles: ".png,.jpg,.gif,.bmp,.jpeg",
@@ -20,6 +24,11 @@ $(function() {
             self.on("sending", function (file) {
                 console.log('upload started', file);
                 $('.meter').show();
+            });
+
+            // Success
+            self.on('success', function( file, resp ){
+                formatJsonToHtml(resp.responses);
             });
 
             // File upload Progress

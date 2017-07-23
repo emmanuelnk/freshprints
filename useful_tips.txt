@@ -1,0 +1,15 @@
+1. Creating gcloud bucket
+> gsutil mb gs://[YOUR_BUCKET_NAME]
+> gsutil defacl set public-read gs://[YOUR_BUCKET_NAME]
+
+[YOUR_BUCKET_NAME] should be lower caps, no spaces, no brackets
+
+2. Default Credentials for remote API access (mainly for testing)
+https://developers.google.com/accounts/docs/application-default-credentials
+https://cloud.google.com/sdk/gcloud/reference/beta/auth/application-default/login
+If you want your local application to temporarily use your own user credentials for API access, run:
+> gcloud beta auth application-default login
+This will install gcloud beta tools if they aren't already installed on your machine
+
+3. Manage files in google cloud bucket
+https://console.cloud.google.com/storage/browser?_ga=1.197089836.1418440327.1500525003&project=fresh-prints-image-analyzer
