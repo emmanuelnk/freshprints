@@ -9,7 +9,8 @@ $(function() {
     }
 
     Dropzone.options.myAwesomeDropzone = {
-        maxFilesize: 500,
+        maxFilesize: 5,//mb
+        maxFiles:16,
         addRemoveLinks: true,
         dictResponseError: 'Server not Configured',
         acceptedFiles: ".png,.jpg,.gif,.bmp,.jpeg",
