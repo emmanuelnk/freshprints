@@ -22,13 +22,13 @@ $(function() {
    Dropzone.options.myAwesomeDropzone = {
         maxFilesize: 5,//mb
         maxFiles:16,
-        addRemoveLinks: true,
+        addRemoveLinks: false,
         dictResponseError: 'Server not Configured',
         acceptedFiles: ".png,.jpg,.gif,.bmp,.jpeg",
         init:function(){
             const self = this;
             // config
-            self.options.addRemoveLinks = true;
+            self.options.addRemoveLinks = false;
             self.options.dictRemoveFile = "Delete";
             //New file added
             self.on("addedfile", function (file) {

@@ -114,47 +114,54 @@ app.post("/file-upload", multer.single("file"), (req, res, next) => {
     blobStream.on("finish", () => {
         // The public URL can be used to directly access the file via HTTP.
         const publicUrl = format(`https://storage.googleapis.com/${bucket.name}/${blob.name}`);
+        // gs link
+        const gsLink = `gs://${bucket.name}/${blob.name}`;
         // res.status(200).send(publicUrl);
 
         // Build the vision object
         let visionObj = {};
-
-        vision.detectFaces(storage.bucket(bucket.name).file(blob.name)).then((results) => {
+        const visionImageFeatures =[{
+            type:"FACE_DETECTION"
+        },{
+            type:"LANDMARK_DETECTION"
+        },{
+            type:"LOGO_DETECTION"
+        },{
+            type:"LABEL_DETECTION"
+        },{
+            type:"TEXT_DETECTION"
+        },{
+            type:"IMAGE_PROPERTIES"
+        },{
+            type:"CROP_HINTS"
+        }
+        ,{
+            type:"WEB_DETECTION"
+        }
+        ];
+        const request = {
+            image: {source: {imageUri: gsLink}},
+            features: visionImageFeatures,
+        };
+        vision.annotate(request).then(response => {
+            // doThingsWith(response);
             visionObj.cloudFileName = blob.name;
-            visionObj.faces = results;
-            return vision.detectLogos(storage.bucket(bucket.name).file(blob.name))
-        }).then((results) => {
-            visionObj.logos = results;
-            console.log(visionObj);
-            return vision.detectLandmarks(storage.bucket(bucket.name).file(blob.name));
-        }).then((results) => {
-            visionObj.landmarks = results;
-            console.log(visionObj);
-            return vision.detectText(storage.bucket(bucket.name).file(blob.name));
-        }).then((results) => {
-            visionObj.text = results;
-            console.log(visionObj);
-            return vision.detectProperties(storage.bucket(bucket.name).file(blob.name));
-        }).then((results) => {
-            visionObj.properties = results;
-            console.log(visionObj);
+            visionObj.responses = response[1].responses;
             res.status(200).send(visionObj);
-
             // then delete the file from the bucket because we no longer need it
-            storage
-                .bucket(bucket.name)
-                .file(blob.name)
-                .delete()
-                .then(() => {
-                    console.log(`gs://${bucket.name}/${blob.name} deleted.`);
-                })
-                .catch((err) => {
-                    console.error('ERROR:', err);
-                });
-        }).catch((err) => {
-            console.error('ERROR:', err);
+                storage
+                    .bucket(bucket.name)
+                    .file(blob.name)
+                    .delete()
+                    .then(() => {
+                        console.log(`gs://${bucket.name}/${blob.name} deleted.`);
+                    })
+                    .catch((err) => {
+                        console.error('ERROR:', err);
+                    });
+        }).catch(err => {
+            console.error(err);
         });
-
     });
 
     blobStream.end(req.file.buffer);
