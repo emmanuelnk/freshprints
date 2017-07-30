@@ -10,3 +10,7 @@
 .gvarv_clones > .nav-tabs {
     border-bottom:none;
 }
+
+.no-data {
+    color: #8a8a8a;
+}

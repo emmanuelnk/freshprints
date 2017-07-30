@@ -131,6 +131,8 @@ $(function() {
         // set data targets
         $("#collapse_button_"+cloneCount).attr('data-target',"#foo_" + cloneCount);
         $("#face-tab_"+cloneCount).attr('href',"#face-view_" + cloneCount);
+        $("#labels-tab_"+cloneCount).attr('href',"#labels-view_" + cloneCount);
+        $("#text-tab_"+cloneCount).attr('href',"#text-view_" + cloneCount);
         $("#landmark-tab_"+cloneCount).attr('href',"#landmark-view_" + cloneCount);
         $("#logo-tab_"+cloneCount).attr('href',"#logo-view_" + cloneCount);
         $("#props-tab_"+cloneCount).attr('href',"#props-view_" + cloneCount);
@@ -152,71 +154,73 @@ $(function() {
         // JSON tab
         $("#json-view_"+cloneCount).append(renderjson(data));
 
+        // Build tabs
+        buildFaceTab ();
+        buildLabelsTab ();
+        buildTextTab ();
+
         // Face tab
         // create new gvarv obj
-        const gvarv = new Gvarv("face_canvas_"+cloneCount);
-        applyZoom(gvarv.canvas,"canvasContainer_"+cloneCount);
-        // pan and zoom events
-        $('#zoomIn_'+cloneCount).click(function(){
-            gvarv.canvas.setZoom(gvarv.canvas.getZoom() * 1.1 ) ;
-        }) ;
-        $('#zoomOut_'+cloneCount).click(function(){
-            gvarv.canvas.setZoom(gvarv.canvas.getZoom() / 1.1 ) ;
-        }) ;
-        $('#goRight_'+cloneCount).click(function(){
-            const units = 10 ;
-            const delta = new fabric.Point(units,0) ;
-            gvarv.canvas.relativePan(delta) ;
-        }) ;
-        $('#goLeft_'+cloneCount).click(function(){
-            const units = 10 ;
-            const delta = new fabric.Point(-units,0) ;
-            gvarv.canvas.relativePan(delta) ;
-        }) ;
-        $('#goUp_'+cloneCount).click(function(){
-            const units = 10 ;
-            const delta = new fabric.Point(0,-units) ;
-            gvarv.canvas.relativePan(delta) ;
-        }) ;
-        $('#goDown'+cloneCount).click(function(){
-            const units = 10 ;
-            const delta = new fabric.Point(0,units) ;
-            gvarv.canvas.relativePan(delta) ;
-        }) ;
-        // add image to canvas
-        // console.log("File_deb",file);
-        gvarv.addImageToCanvas(data.imagePublicUrl,file.width,file.height).then(function(oImg){
-            const gvarv_group = gvarv.addGroup([oImg]);
+        function buildFaceTab () {
             if(data.responses[0].faceAnnotations.length > 0) {
-                let barChartDataObjArr = [];
-                data.responses[0].faceAnnotations.forEach(function(el,i){
-                    gvarv_group.addWithUpdate(gvarv.addFacePoly(el.boundingPoly.vertices, "lightgreen"));
-                    gvarv_group.addWithUpdate(gvarv.addFacePoly(el.fdBoundingPoly.vertices, "lightgreen"));
-                    if(el.landmarks.length > 0) {
-                        el.landmarks.forEach(function(ell){
-                            gvarv_group.addWithUpdate(gvarv.addFaceLandmark(ell.position.y,ell.position.x,"lightgreen"));
+                const gvarv = new Gvarv("face_canvas_" + cloneCount);
+                applyZoom(gvarv.canvas, "canvasContainer_" + cloneCount);
+                setPanAndZoomCanvasEvents(gvarv, `face_${cloneCount}`);
+                // add image to canvas
+                // console.log("File_deb",file);
+                gvarv.addImageToCanvas(data.imagePublicUrl, file.width, file.height).then(function (oImg) {
+                    const gvarv_group = gvarv.addGroup([oImg]);
+                        let barChartDataObjArr = [];
+                        let confBarChartDataObjArr = [];
+                        $("#num_faces_id_" + cloneCount).text(data.responses[0].faceAnnotations.length);
+                        data.responses[0].faceAnnotations.forEach(function (el, i) {
+                            i++;
+                            gvarv_group.addWithUpdate(gvarv.addFacePoly(el.boundingPoly.vertices, "lightgreen"));
+                            gvarv_group.addWithUpdate(gvarv.addFacePoly(el.fdBoundingPoly.vertices, "lightgreen"));
+                            gvarv_group.addWithUpdate(gvarv.addFaceNumber(`${i}`, el.boundingPoly.vertices[0]));
+                            if (el.landmarks.length > 0) {
+                                el.landmarks.forEach(function (ell) {
+                                    gvarv_group.addWithUpdate(gvarv.addFaceLandmark(ell.position.y, ell.position.x, "lightgreen"));
+                                });
+                            }
+
+
+                            let likelihoodArr = [];
+                            likelihoodArr.push(getLikelihood(el.joyLikelihood));
+                            likelihoodArr.push(getLikelihood(el.sorrowLikelihood));
+                            likelihoodArr.push(getLikelihood(el.angerLikelihood));
+                            likelihoodArr.push(getLikelihood(el.surpriseLikelihood));
+                            likelihoodArr.push(getLikelihood(el.underExposedLikelihood));
+                            likelihoodArr.push(getLikelihood(el.blurredLikelihood));
+                            likelihoodArr.push(getLikelihood(el.headwearLikelihood));
+                            barChartDataObjArr.push({name: "Face " + i, data: likelihoodArr});
+
+                            let confidenceArr = [];
+                            confidenceArr.push(_.round(el.detectionConfidence, 2));
+                            confidenceArr.push(_.round(el.landmarkingConfidence, 2));
+                            confBarChartDataObjArr.push({name: "Face " + i, data: confidenceArr});
+
+                            buildAnglesTable(cloneCount, i, {
+                                panAngle: _.round(angle360(el.panAngle * (180 / Math.PI), 1)) + "°",
+                                rollAngle: _.round(angle360(el.rollAngle * (180 / Math.PI), 1)) + "°",
+                                tiltAngle: _.round(angle360(el.tiltAngle * (180 / Math.PI), 1)) + "°"
+                            });
+
                         });
-                    }
-                    let likelihoodArr = [];
-                    likelihoodArr.push(getLikelihood(el.joyLikelihood));
-                    likelihoodArr.push(getLikelihood(el.sorrowLikelihood));
-                    likelihoodArr.push(getLikelihood(el.angerLikelihood));
-                    likelihoodArr.push(getLikelihood(el.surpriseLikelihood));
-                    likelihoodArr.push(getLikelihood(el.underExposedLikelihood));
-                    likelihoodArr.push(getLikelihood(el.blurredLikelihood));
-                    likelihoodArr.push(getLikelihood(el.headwearLikelihood));
-                    barChartDataObjArr.push({name:"Face "+ ++i,data:likelihoodArr});
-
+                        buildLikelihoodChart("chartContainer_" + cloneCount, barChartDataObjArr);
+                        buildConfidenceChart("confidenceChartContainer_" + cloneCount, confBarChartDataObjArr);
+                    gvarv.canvas.add(gvarv_group);
+                }, function (err) {
+                    console.log(err);
                 });
-                buildLikelihoodChart("chartContainer_"+cloneCount,barChartDataObjArr);
-
+            } else {
+                $("#face-view_"+cloneCount).empty();
+                $("#face-view_"+cloneCount).append("<h3 class='text-center no-data' >NONE DETECTED</h3>");
             }
+        }
 
-            gvarv.canvas.add(gvarv_group);
-        },function(err){
-            console.log(err);
-        });
 
+        // untied functions
         // Liklihood
         function getLikelihood(val){
             switch (val) {
@@ -228,6 +232,36 @@ $(function() {
                 case "VERY_LIKELY":return 1;break;
                 default:return 0;break;
             }
+        }
+
+        function setPanAndZoomCanvasEvents(gvarvObj,countId) {
+            // pan and zoom events
+            $('#zoomIn_'+countId).click(function(){
+                gvarvObj.canvas.setZoom(gvarvObj.canvas.getZoom() * 1.1 ) ;
+            }) ;
+            $('#zoomOut_'+countId).click(function(){
+                gvarvObj.canvas.setZoom(gvarvObj.canvas.getZoom() / 1.1 ) ;
+            }) ;
+            $('#goRight_'+countId).click(function(){
+                const units = 10 ;
+                const delta = new fabric.Point(units,0) ;
+                gvarvObj.canvas.relativePan(delta) ;
+            }) ;
+            $('#goLeft_'+countId).click(function(){
+                const units = 10 ;
+                const delta = new fabric.Point(-units,0) ;
+                gvarvObj.canvas.relativePan(delta) ;
+            }) ;
+            $('#goUp_'+countId).click(function(){
+                const units = 10 ;
+                const delta = new fabric.Point(0,-units) ;
+                gvarvObj.canvas.relativePan(delta) ;
+            }) ;
+            $('#goDown'+countId).click(function(){
+                const units = 10 ;
+                const delta = new fabric.Point(0,units) ;
+                gvarvObj.canvas.relativePan(delta) ;
+            }) ;
         }
 
         function buildLikelihoodChart(chartContainerId,dataArr) {
@@ -244,7 +278,7 @@ $(function() {
                     type: 'bar'
                 },
                 title: {
-                    text: ''
+                    text: 'Likelihood'
                 },
                 xAxis: {
                     categories: ['Joy', 'Sorrow', 'Anger', 'Surprise', 'Under-exposed','Blurred','Headwear'],
@@ -276,6 +310,168 @@ $(function() {
                 series: dataArr
             });
         }
+
+        function buildConfidenceChart (containerId,dataArr) {
+            Highcharts.chart(containerId, {
+                chart: {
+                    type: 'bar'
+                },
+                title: {
+                    text: 'Detection Confidence'
+                },
+                xAxis: {
+                    categories: ['Face Bounds','Facial Landmarks'],
+                    title: {
+                        text: null
+                    }
+                },
+                yAxis: {
+                    min: 0,
+                    max:1,
+                    title: {
+                        text: 'Confidence',
+                        align: 'high'
+                    },
+                    labels: {
+                        overflow: 'justify'
+                    }
+                },
+                tooltip: {
+                    valueSuffix: ''
+                },
+                plotOptions: {
+                    bar: {
+                        dataLabels: {
+                            enabled: true
+                        }
+                    }
+                },
+                credits: {
+                    enabled: false
+                },
+                series: dataArr
+            });
+        }
+
+        // build table for roll, tilt and pan angles
+        function buildAnglesTable (itemIndex,faceNum,obj) {
+            const $dataRow = $( `<tr><td>${faceNum}</td><td>${obj.panAngle}</td><td>${obj.rollAngle}</td><td>${obj.tiltAngle}</td></tr>`);
+            $("#anglesTable_"+itemIndex+" > tbody").append($dataRow);
+        }
+        // to limit angle to
+        function angle360 (angle) {
+            if (angle > 360 || angle < -360) {
+                return (angle - (360 * Math.floor(angle/360)))
+            }
+            return angle;
+        }
+
+        // Labels tab
+        function buildLabelsTab () {
+            if (data.responses[0].labelAnnotations.length > 0) {
+                $("#num_labels_id_"+cloneCount).text(data.responses[0].labelAnnotations.length);
+                let labelsDataArr = [];
+                data.responses[0].labelAnnotations.forEach(function(el,i){
+                    labelsDataArr.push([el.description,_.round(el.score,2)]);
+                });
+                // console.log(labelsDataArr);
+                buildLabelsGraph("labelsChartContainer_"+cloneCount,labelsDataArr);
+            } else {
+                $("#labels-view_"+cloneCount).empty();
+                $("#labels-view_"+cloneCount).append("<h3 class='text-center no-data' >NONE DETECTED</h3>");
+            }
+        }
+
+
+        function buildLabelsGraph (containerId,seriesData) {
+            Highcharts.chart(containerId, {
+                chart: {
+                    type: 'bar'
+                },
+                title: {
+                    text: 'Labels'
+                },
+                xAxis: {
+                    tickInterval: 1,
+                    labels: {
+                        enabled: true,
+                        formatter: function() { return seriesData[this.value][0];},
+                    }
+                },
+                yAxis: {
+                    min: 0,
+                    max:1,
+                    title: {
+                        text: 'Confidence',
+                        align: 'high'
+                    },
+                    labels: {
+                        overflow: 'justify'
+                    }
+                },
+                tooltip: {
+                    valueSuffix: ''
+                },
+                plotOptions: {
+                    bar: {
+                        dataLabels: {
+                            enabled: true
+                        }
+                    }
+                },
+                credits: {
+                    enabled: false
+                },
+                series: [{
+                    name:"Detection Confidence",
+                    data:seriesData
+                }]
+            });
+        }
+
+        // Text tab
+        // create new gvarv obj
+
+        function buildTextTab () {
+            if (data.responses[0].textAnnotations.length > 0) {
+                const gvarv = new Gvarv("text_canvas_"+cloneCount);
+                applyZoom(gvarv.canvas,"textCanvasContainer_"+cloneCount);
+                setPanAndZoomCanvasEvents(gvarv, `text_${cloneCount}`);
+                $("#num_text_id_"+cloneCount).text("✓");
+                $("#detectedTextParagraph_"+cloneCount).text(data.responses[0].fullTextAnnotation.text);
+
+                gvarv.addImageToCanvas(data.imagePublicUrl,file.width,file.height).then(function(oImg) {
+                    const gvarv_group = gvarv.addGroup([oImg]);
+
+                    data.responses[0].fullTextAnnotation.pages.forEach(function(page){
+                        //page.property.detectedLanguages.{confidence,languageCode}
+                        page.blocks.forEach(function(block){
+                            // block.boundingBox.vertices //to fabric poly
+                            gvarv_group.addWithUpdate(gvarv.addWordPoly(block.boundingBox.vertices, "red"));
+                            block.paragraphs.forEach(function(paragraph){
+                                // paragraph.boundingBox.vertices //to fabric poly
+                                gvarv_group.addWithUpdate(gvarv.addWordPoly(paragraph.boundingBox.vertices, "orange"));
+                                paragraph.words.forEach(function(word){
+                                    // word.boundingBox.vertices //to fabric poly
+                                    gvarv_group.addWithUpdate(gvarv.addWordPoly(word.boundingBox.vertices, "yellow"));
+                                    word.symbols.forEach(function(symbol){
+                                        // symbol.boundingBox.vertices //to fabric poly
+                                        gvarv_group.addWithUpdate(gvarv.addWordPoly(symbol.boundingBox.vertices, "lightgreen"));
+                                    });
+                                });
+                            });
+                        });
+                    });
+                    gvarv.canvas.add(gvarv_group);
+                },function(err){
+                    console.log(err);
+                });
+            }else{
+                $("#text-view_"+cloneCount).empty();
+                $("#text-view_"+cloneCount).append("<h3 class='text-center no-data' >NONE DETECTED</h3>");
+            }
+        }
+
 
     }
 
