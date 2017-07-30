@@ -727,3 +727,6 @@ footer > * {
 footer .logo {
     margin: 2.8rem 0;
     width: 270px; }
+footer > p {
+    margin: 0 0;
+}

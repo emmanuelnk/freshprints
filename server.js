@@ -86,15 +86,15 @@ app.post("/contact", contactController.contactPost);
 
 // app requests
 
-app.post("/local-upload", multer.single("file"), function (req, res, next) {
-    // console.log(req.file);
-    if (!req.file.mimetype.startsWith("image/")) {
-        return res.status(422).json({
-            error: "The uploaded file must be an image"
-        });
-    }
-    return res.status(200).send(req.file);
-});
+// app.post("/local-upload", multer.single("file"), function (req, res, next) {
+//     // console.log(req.file);
+//     if (!req.file.mimetype.startsWith("image/")) {
+//         return res.status(422).json({
+//             error: "The uploaded file must be an image"
+//         });
+//     }
+//     return res.status(200).send(req.file);
+// });
 
 // Process the file upload and upload to Google Cloud Storage.
 app.post("/file-upload", multer.single("file"), (req, res, next) => {
@@ -113,7 +113,7 @@ app.post("/file-upload", multer.single("file"), (req, res, next) => {
 
     blobStream.on("finish", () => {
         // The public URL can be used to directly access the file via HTTP.
-        const publicUrl = format(`https://storage.googleapis.com/${bucket.name}/${blob.name}`);
+        const imagePublicUrl = format(`https://storage.googleapis.com/${bucket.name}/${blob.name}`);
         // gs link
         const gsLink = `gs://${bucket.name}/${blob.name}`;
         // res.status(200).send(publicUrl);
@@ -146,19 +146,20 @@ app.post("/file-upload", multer.single("file"), (req, res, next) => {
         vision.annotate(request).then(response => {
             // doThingsWith(response);
             visionObj.cloudFileName = blob.name;
+            visionObj.imagePublicUrl = imagePublicUrl;
             visionObj.responses = response[1].responses;
             res.status(200).send(visionObj);
             // then delete the file from the bucket because we no longer need it
-                storage
-                    .bucket(bucket.name)
-                    .file(blob.name)
-                    .delete()
-                    .then(() => {
-                        console.log(`gs://${bucket.name}/${blob.name} deleted.`);
-                    })
-                    .catch((err) => {
-                        console.error('ERROR:', err);
-                    });
+            //     storage
+            //         .bucket(bucket.name)
+            //         .file(blob.name)
+            //         .delete()
+            //         .then(() => {
+            //             console.log(`gs://${bucket.name}/${blob.name} deleted.`);
+            //         })
+            //         .catch((err) => {
+            //             console.error('ERROR:', err);
+            //         });
         }).catch(err => {
             console.error(err);
         });

@@ -1,0 +1,12 @@
+.gvarv_badge{
+    margin: 0 3px;
+}
+
+.gvarv_clones > .panel-heading {
+    padding:20px 30px 0 30px;
+    border-bottom:none;
+}
+
+.gvarv_clones > .nav-tabs {
+    border-bottom:none;
+}
