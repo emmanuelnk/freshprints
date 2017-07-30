@@ -134,9 +134,10 @@ app.post("/file-upload", multer.single("file"), (req, res, next) => {
             type:"IMAGE_PROPERTIES"
         },{
             type:"CROP_HINTS"
-        }
-        ,{
+        },{
             type:"WEB_DETECTION"
+        },{
+            type:"SAFE_SEARCH_DETECTION"
         }
         ];
         const request = {

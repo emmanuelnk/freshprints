@@ -59,6 +59,8 @@
                                     <span class="icon-bar"></span>
                                     <span class="icon-bar"></span>
                                     <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
                                 </button>
                             </div>
                         </div>
@@ -75,6 +77,12 @@
                             </li>
                             <li >
                                 <a id="text-tab" data-toggle="tab" href="#text-view">Text<span id="num_text_id" class="badge gvarv_badge"></span></a>
+                            </li>
+                            <li >
+                                <a id="webmatch-tab" data-toggle="tab" href="#webmatch-view">Web<span id="num_webmatch_id" class="badge gvarv_badge"></span></a>
+                            </li>
+                            <li >
+                                <a id="safesearch-tab" data-toggle="tab" href="#safesearch-view">Safe Search<span id="num_safesearch_id" class="badge gvarv_badge"></span></a>
                             </li>
                             <li >
                                 <a id="landmark-tab" data-toggle="tab" href="#landmark-view">Landmarks<span id="num_landmarks_id" class="badge gvarv_badge"></span></a>
@@ -94,7 +102,7 @@
                     <div class="tab-content collapse" id="foo">
                         <div id="face-view" class="tab-pane fade panel-body active in">
                             <div style="margin:10px 0;">
-                                <h4>Use the the mouse and mousewheel or buttons below to pan and zoom</h4>
+                                <h4>Use the the mouse and mousewheel or buttons below to pan and zoom. Every detected face has a number in top left corner of its bounding box</h4>
                                 <button id="zoomIn_face" class="btn btn-sm">+</button>
                                 <button id="zoomOut_face" class="btn btn-sm">-</button>
                                 <button id="goLeft_face" class="btn btn-sm"><</button>
@@ -145,14 +153,22 @@
                                 <div class="col-md-8"><p id="detectedTextParagraph"></p></div>
                             </div>
                         </div>
+                        <div id="webmatch-view" class="tab-pane fade panel-body">
+                            <div id="webmatchChartContainer" style="min-width: 200px; max-width: 800px; height: 400px; margin:25px auto"></div>
+                            <div class="panel-group" role="tablist" aria-multiselectable="true" id="webMatchAccordion">
+                            </div>
+                        </div>
+                        <div id="safesearch-view" class="tab-pane fade panel-body">
+                            <div id="safesearchChartContainer" style="min-width: 200px; max-width: 800px; height: 400px; margin:25px auto"></div>
+                        </div>
                         <div id="landmark-view" class="tab-pane fade panel-body">
-                            <p>4. Coming Soon</p>
+                            <p>6. Coming Soon</p>
                         </div>
                         <div id="logo-view" class="tab-pane fade panel-body">
-                            <p>5. Coming Soon</p>
+                            <p>7. Coming Soon</p>
                         </div>
                         <div id="props-view" class="tab-pane fade panel-body">
-                            <p>6. Coming Soon</p>
+                            <p>8. Coming Soon</p>
                         </div>
                         <div id="json-view" class="tab-pane fade panel-body">
                         </div>

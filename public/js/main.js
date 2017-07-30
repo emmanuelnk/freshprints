@@ -133,6 +133,8 @@ $(function() {
         $("#face-tab_"+cloneCount).attr('href',"#face-view_" + cloneCount);
         $("#labels-tab_"+cloneCount).attr('href',"#labels-view_" + cloneCount);
         $("#text-tab_"+cloneCount).attr('href',"#text-view_" + cloneCount);
+        $("#webmatch-tab_"+cloneCount).attr('href',"#webmatch-view_" + cloneCount);
+        $("#safesearch-tab_"+cloneCount).attr('href',"#safesearch-view_" + cloneCount);
         $("#landmark-tab_"+cloneCount).attr('href',"#landmark-view_" + cloneCount);
         $("#logo-tab_"+cloneCount).attr('href',"#logo-view_" + cloneCount);
         $("#props-tab_"+cloneCount).attr('href',"#props-view_" + cloneCount);
@@ -158,6 +160,8 @@ $(function() {
         buildFaceTab ();
         buildLabelsTab ();
         buildTextTab ();
+        buildWebTab ();
+        buildSafeSearchtab ();
 
         // Face tab
         // create new gvarv obj
@@ -214,8 +218,9 @@ $(function() {
                     console.log(err);
                 });
             } else {
-                $("#face-view_"+cloneCount).empty();
-                $("#face-view_"+cloneCount).append("<h3 class='text-center no-data' >NONE DETECTED</h3>");
+                $("#face-view_"+cloneCount)
+                    .empty()
+                    .append("<h3 class='text-center no-data' >NONE DETECTED</h3>");
             }
         }
 
@@ -257,7 +262,7 @@ $(function() {
                 const delta = new fabric.Point(0,-units) ;
                 gvarvObj.canvas.relativePan(delta) ;
             }) ;
-            $('#goDown'+countId).click(function(){
+            $('#goDown_'+countId).click(function(){
                 const units = 10 ;
                 const delta = new fabric.Point(0,units) ;
                 gvarvObj.canvas.relativePan(delta) ;
@@ -377,8 +382,9 @@ $(function() {
                 // console.log(labelsDataArr);
                 buildLabelsGraph("labelsChartContainer_"+cloneCount,labelsDataArr);
             } else {
-                $("#labels-view_"+cloneCount).empty();
-                $("#labels-view_"+cloneCount).append("<h3 class='text-center no-data' >NONE DETECTED</h3>");
+                $("#labels-view_"+cloneCount)
+                    .empty()
+                    .append("<h3 class='text-center no-data' >NONE DETECTED</h3>");
             }
         }
 
@@ -430,7 +436,6 @@ $(function() {
         }
 
         // Text tab
-        // create new gvarv obj
 
         function buildTextTab () {
             if (data.responses[0].textAnnotations.length > 0) {
@@ -467,12 +472,181 @@ $(function() {
                     console.log(err);
                 });
             }else{
-                $("#text-view_"+cloneCount).empty();
-                $("#text-view_"+cloneCount).append("<h3 class='text-center no-data' >NONE DETECTED</h3>");
+                $("#text-view_"+cloneCount)
+                    .empty()
+                    .append("<h3 class='text-center no-data' >NONE DETECTED</h3>");
             }
         }
 
+        // Web match tab
 
+        function buildWebTab () {
+            if (data.responses[0].webDetection.webEntities.length > 0) {
+                $("#num_webmatch_id_"+cloneCount).text(data.responses[0].webDetection.fullMatchingImages.length + data.responses[0].webDetection.partialMatchingImages.length + data.responses[0].webDetection.pagesWithMatchingImages.length);
+                let webDataArr = [];
+                data.responses[0].webDetection.webEntities.forEach(function(el,i){
+                    webDataArr.push([el.description,_.round(el.score,2)]);
+                });
+                buildWebMatchGraph("webmatchChartContainer_"+cloneCount,webDataArr);
+
+                // Full matching images
+                $(`#webMatchAccordion_${cloneCount}`).append(`
+                      <div class="panel panel-default">
+                        <div class="panel-heading" role="tab">
+                            <h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#webMatchAccordion_${cloneCount}" aria-expanded="false" href="#webMatchAccordion_${cloneCount} .item-1">Full Matching Images</a></h4>
+                        </div>
+                        <div class="panel-collapse collapse item-1" role="tabpanel">
+                            <div id="itembody_${cloneCount}_panel_1" class="panel-body"></div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab">
+                            <h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#webMatchAccordion_${cloneCount}" aria-expanded="false" href="#webMatchAccordion_${cloneCount} .item-2">Partially Matching Images</a></h4>
+                        </div>
+                        <div class="panel-collapse collapse item-2" role="tabpanel">
+                            <div id="itembody_${cloneCount}_panel_2" class="panel-body"></div>
+                        </div>
+                    </div>
+                      <div class="panel panel-default">
+                        <div class="panel-heading" role="tab">
+                            <h4 class="panel-title"><a role="button" data-toggle="collapse" data-parent="#webMatchAccordion_${cloneCount}" aria-expanded="false" href="#webMatchAccordion_${cloneCount} .item-3">Pages with Matching Images</a></h4>
+                        </div>
+                        <div class="panel-collapse collapse item-3" role="tabpanel">
+                            <div id="itembody_${cloneCount}_panel_3" class="panel-body"></div>
+                        </div>
+                    </div>
+                    `);
+
+                data.responses[0].webDetection.fullMatchingImages.forEach(function(el,i){
+                    $(`#itembody_${cloneCount}_panel_1`).append(`<h4>${++i}.<a href="${el.url}">${el.url}</a></h4>`);
+                });
+                data.responses[0].webDetection.partialMatchingImages.forEach(function(el,i){
+                    $(`#itembody_${cloneCount}_panel_2`).append(`<h4>${++i}.<a href="${el.url}">${el.url}</a></h4>`);
+                });
+                data.responses[0].webDetection.pagesWithMatchingImages.forEach(function(el,i){
+                    $(`#itembody_${cloneCount}_panel_3`).append(`<h4>${++i}.<a href="${el.url}">${el.url}</a></h4>`);
+                });
+
+            }else {
+                $("#webmatch-view_"+cloneCount)
+                    .empty()
+                    .append("<h3 class='text-center no-data' >NONE DETECTED</h3>");
+            }
+        }
+
+        function buildWebMatchGraph (containerId,seriesData) {
+            Highcharts.chart(containerId, {
+                chart: {
+                    type: 'bar'
+                },
+                title: {
+                    text: 'Web Entities'
+                },
+                xAxis: {
+                    tickInterval: 1,
+                    labels: {
+                        enabled: true,
+                        formatter: function() { return seriesData[this.value][0];},
+                    }
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: 'Confidence',
+                        align: 'high'
+                    },
+                    labels: {
+                        overflow: 'justify'
+                    }
+                },
+                tooltip: {
+                    valueSuffix: ''
+                },
+                plotOptions: {
+                    bar: {
+                        dataLabels: {
+                            enabled: true
+                        }
+                    }
+                },
+                credits: {
+                    enabled: false
+                },
+                series: [{
+                    name:"Web Entitity Match Confidence",
+                    data:seriesData
+                }]
+            });
+        }
+
+
+        function buildSafeSearchtab () {
+            if(data.responses[0].safeSearchAnnotation !== null) {
+                $("#num_safesearch_id_"+cloneCount).text("✓");
+                const el = data.responses[0].safeSearchAnnotation;
+                let likelihoodArr = [];
+                let barChartDataObjArr = [];
+                likelihoodArr.push(getLikelihood(el.adult));
+                likelihoodArr.push(getLikelihood(el.spoof));
+                likelihoodArr.push(getLikelihood(el.medical));
+                likelihoodArr.push(getLikelihood(el.violence));
+                barChartDataObjArr.push({name:"Safe Search", data: likelihoodArr});
+                buildSafesearchLikelihoodChart("safesearchChartContainer_"+cloneCount, barChartDataObjArr);
+            } else {
+                $("#safesearch-view_"+cloneCount)
+                    .empty()
+                    .append("<h3 class='text-center no-data' >NONE DETECTED</h3>");
+            }
+
+
+        }
+
+        function buildSafesearchLikelihoodChart (chartContainerId,dataArr) {
+            const likelihoodValues = {
+                0: 'UNKNOWN',
+                0.2: 'VERY_UNLIKELY',
+                0.4: 'UNLIKELY',
+                0.6: 'POSSIBLE',
+                0.8: 'LIKELY',
+                1: 'VERY_LIKELY'
+            };
+            Highcharts.chart(chartContainerId, {
+                chart: {
+                    type: 'bar'
+                },
+                title: {
+                    text: 'Safe Search Likelihood'
+                },
+                xAxis: {
+                    categories: ['adult','spoof','medical','violence'],
+                    title: {
+                        text: null
+                    }
+                },
+                yAxis: {
+                    labels: {
+                        formatter: function() {
+                            const value = likelihoodValues[this.value];
+                            return value !== 'undefined' ? value : this.value;
+                        }
+                    }
+                },
+                tooltip: {
+                    valueSuffix: ''
+                },
+                plotOptions: {
+                    bar: {
+                        dataLabels: {
+                            enabled: true
+                        }
+                    }
+                },
+                credits: {
+                    enabled: false
+                },
+                series: dataArr
+            });
+        }
     }
 
 
