@@ -162,7 +162,22 @@
                             <div id="safesearchChartContainer" style="min-width: 200px; max-width: 800px; height: 400px; margin:25px auto"></div>
                         </div>
                         <div id="landmark-view" class="tab-pane fade panel-body">
-                            <p>6. Coming Soon</p>
+                            <div style="margin:10px 0;">
+                                <h4>Use the the mouse and mousewheel or buttons below to pan and zoom</h4>
+                                <button id="zoomIn_text" class="btn btn-sm">+</button>
+                                <button id="zoomOut_text" class="btn btn-sm">-</button>
+                                <button id="goLeft_text" class="btn btn-sm"><</button>
+                                <button id="goRight_text" class="btn btn-sm">></button>
+                                <button id="goUp_text" class="btn btn-sm">^</button>
+                                <button id="goDown_text" class="btn btn-sm">v</button>
+                            </div>
+                            <div id="landmarksCanvasContainer" style="border: dotted gray thin;height:400px;overflow: hidden">
+                                <canvas id="landmarks_canvas"></canvas>
+                            </div>
+                            <div id="landmarkScoreRow" class="row">
+                            </div>
+                            <div class="panel-group" role="tablist" aria-multiselectable="true" id="landmarkMapAccordion">
+                            </div>
                         </div>
                         <div id="logo-view" class="tab-pane fade panel-body">
                             <p>7. Coming Soon</p>

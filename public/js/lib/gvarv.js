@@ -37,6 +37,18 @@ const Gvarv = function (canvasId) {
             strokeWidth:1,
             fill: 'transparent'});
     };
+    this.addLandmarkPoly = function (points, color) {
+        return new fabric.Polygon(points,{
+            stroke:color,
+            strokeWidth:5,
+            fill: 'transparent'});
+    };
+    this.addLogoPoly = function (points, color) {
+        return new fabric.Polygon(points,{
+            stroke:color,
+            strokeWidth:2,
+            fill: 'transparent'});
+    };
     this.addFaceLandmark = function (top, left,color) {
         return new fabric.Circle({
             top:top,
@@ -48,7 +60,7 @@ const Gvarv = function (canvasId) {
             strokeWidth:1,
             fill: 'transparent'});
     };
-    this.addFaceNumber = function (num,obj) {
+    this.addPolyNumber = function (num,obj) {
         return new fabric.Text(num, {
             left:obj.x,
             top:obj.y,

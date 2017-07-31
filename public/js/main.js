@@ -20,6 +20,7 @@ $(function() {
     let numFiles = 0;
     let numFilesJSONContainer = 0;
     let numClones = 1;
+    let allGoogleMapObj = [];
 
 
    Dropzone.options.myAwesomeDropzone = {
@@ -161,7 +162,8 @@ $(function() {
         buildLabelsTab ();
         buildTextTab ();
         buildWebTab ();
-        buildSafeSearchtab ();
+        buildSafeSearchTab ();
+        buildLandmarksTab ();
 
         // Face tab
         // create new gvarv obj
@@ -181,7 +183,7 @@ $(function() {
                             i++;
                             gvarv_group.addWithUpdate(gvarv.addFacePoly(el.boundingPoly.vertices, "lightgreen"));
                             gvarv_group.addWithUpdate(gvarv.addFacePoly(el.fdBoundingPoly.vertices, "lightgreen"));
-                            gvarv_group.addWithUpdate(gvarv.addFaceNumber(`${i}`, el.boundingPoly.vertices[0]));
+                            gvarv_group.addWithUpdate(gvarv.addPolyNumber(`${i}`, el.boundingPoly.vertices[0]));
                             if (el.landmarks.length > 0) {
                                 el.landmarks.forEach(function (ell) {
                                     gvarv_group.addWithUpdate(gvarv.addFaceLandmark(ell.position.y, ell.position.x, "lightgreen"));
@@ -580,7 +582,7 @@ $(function() {
         }
 
 
-        function buildSafeSearchtab () {
+        function buildSafeSearchTab () {
             if(data.responses[0].safeSearchAnnotation !== null) {
                 $("#num_safesearch_id_"+cloneCount).text("✓");
                 const el = data.responses[0].safeSearchAnnotation;
@@ -647,6 +649,87 @@ $(function() {
                 series: dataArr
             });
         }
+
+        // Build Landmarks tab
+
+        function buildLandmarksTab () {
+            if(data.responses[0].landmarkAnnotations.length > 0) {
+                $("#num_landmarks_id_"+cloneCount).text(data.responses[0].landmarkAnnotations.length);
+                const gvarv = new Gvarv("landmarks_canvas_"+cloneCount);
+                applyZoom(gvarv.canvas,"landmarksCanvasContainer_"+cloneCount);
+                setPanAndZoomCanvasEvents(gvarv, `landmarks_${cloneCount}`);
+
+                gvarv.addImageToCanvas(data.imagePublicUrl,file.width,file.height).then(function(oImg) {
+                    const gvarv_group = gvarv.addGroup([oImg]);
+                    data.responses[0].landmarkAnnotations.forEach(function(landmark,i){
+                        gvarv_group.addWithUpdate(gvarv.addLandmarkPoly(landmark.boundingPoly.vertices, "lightgreen"));
+                        gvarv_group.addWithUpdate(gvarv.addPolyNumber(`${++i}`, landmark.boundingPoly.vertices[0]));
+                        $(`#landmarkScoreRow_${cloneCount}`).append(`
+                        <div class="col-sm-4"><p>Landmark ${i} Score: </p></div>
+                        <div class="col-sm-8"><p>${landmark.score}</p></div>
+                    `);
+                        const mapDiv = initGoogleLandmarkMapContainer(cloneCount,i);
+                        const initMapObj = {
+                            mapDiv,
+                            lat: landmark.locations[0].latLng.latitude,
+                            lng: landmark.locations[0].latLng.longitude
+                        };
+                        allGoogleMapObj.push(initMapObj);
+                        // Map events
+                        $(`.mapPanelTitle`).on('click', function () {
+                            if ($(`.mapPanelTitle`).hasClass("panel-closed")) {
+                                console.log("panel opened!");
+                                $(`.mapPanelTitle`).removeClass("panel-closed");
+                                const idArr = this.id.split("_");
+                                console.log("all", allGoogleMapObj);
+                                initializeGoogleMap(allGoogleMapObj[parseInt(idArr[3])-1]);
+                            } else {
+                                $(`.mapPanelTitle`).addClass("panel-closed")
+                            }
+
+                        });
+                    });
+                    gvarv.canvas.add(gvarv_group);
+
+                },function(err){
+                    console.log(err);
+                });
+            } else {
+                $("#safesearch-view_"+cloneCount)
+                    .empty()
+                    .append("<h3 class='text-center no-data' >NONE DETECTED</h3>");
+            }
+
+        }
+
+        // build landmarks map
+        function initGoogleLandmarkMapContainer(cloneCount,itemCount) {
+            $(`#landmarkMapAccordion_${cloneCount}`).append(`
+              <div class="panel panel-default">
+                <div class="panel-heading" role="tab">
+                    <h4 class="panel-title "><a id="map_panel_${cloneCount}_${itemCount}" class="mapPanelTitle panel-closed" role="button" data-toggle="collapse" data-parent="#landmarkMapAccordion_${cloneCount}" aria-expanded="false" href="#landmarkMapAccordion_${cloneCount} .item-${itemCount}">Map Of Landmark ${itemCount}</a></h4>
+                </div>
+                <div class="panel-collapse collapse item-${itemCount}" role="tabpanel">
+                    <div id="landmarksMapContainer_${cloneCount}_${itemCount}" style="height: 400px; margin:0 auto"></div>
+                </div>
+            </div>
+        `);
+            return `landmarksMapContainer_${cloneCount}_${itemCount}`;
+        }
+    }
+
+    // Google Landmark maps
+    function initializeGoogleMap(obj) {
+        // $(`#${obj.mapDiv}`).load(location.href + `#${obj.mapDiv}`);
+        const uluru = {lat: obj.lat, lng: obj.lng};
+        const map = new google.maps.Map(document.getElementById(obj.mapDiv), {
+            zoom: 8,
+            center: uluru
+        });
+        const marker = new google.maps.Marker({
+            position: uluru,
+            map: map
+        });
     }
 
 
