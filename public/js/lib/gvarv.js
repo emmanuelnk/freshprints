@@ -46,7 +46,7 @@ const Gvarv = function (canvasId) {
     this.addLogoPoly = function (points, color) {
         return new fabric.Polygon(points,{
             stroke:color,
-            strokeWidth:2,
+            strokeWidth:3,
             fill: 'transparent'});
     };
     this.addFaceLandmark = function (top, left,color) {

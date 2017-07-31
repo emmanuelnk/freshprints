@@ -4,17 +4,7 @@ $(function() {
 
     $("#spinnerdiv").hide();
     $("#div_clone").hide();
-    function formatJsonToHtml (obj) {
-        $("#image-props")
-        .append('<h5 style="font-style:italic;font-weight:400;">'+ obj.cloudFileName + '</h5>')
-        .append(renderjson(obj));
-        numFilesJSONContainer++;
-        if(numFilesJSONContainer >= numFiles && numFiles !== 0) {
-            $("#spinnertext").text("Finished!");
-            $("#spinnerel").spin(false);
-            $("#spinnerdiv").hide();
-        }
-    }
+
     const maxGlobalFileSize = 1024*1024*8;
     let currGlobalFileSize = 0;
     let numFiles = 0;
@@ -23,14 +13,51 @@ $(function() {
     let allGoogleMapObj = [];
 
 
-   Dropzone.options.myAwesomeDropzone = {
+
+    // Events
+    // Reset dropzone
+    $("#resetDropzone").click(function(){
+        location.reload();
+    });
+
+    // Functions
+    // GLOBAL FUNCTIONS
+
+    // Google Landmark maps
+    function initializeGoogleMap(obj) {
+        // $(`#${obj.mapDiv}`).load(location.href + `#${obj.mapDiv}`);
+        const uluru = {lat: obj.lat, lng: obj.lng};
+        const map = new google.maps.Map(document.getElementById(obj.mapDiv), {
+            zoom: 8,
+            center: uluru
+        });
+        const marker = new google.maps.Marker({
+            position: uluru,
+            map: map
+        });
+    }
+
+    function formatJsonToHtml (obj) {
+        $("#image-props")
+            .append('<h5 style="font-style:italic;font-weight:400;">'+ obj.cloudFileName + '</h5>')
+            .append(renderjson(obj));
+        numFilesJSONContainer++;
+        if(numFilesJSONContainer >= numFiles && numFiles !== 0) {
+            $("#spinnertext").text("Finished!");
+            $("#spinnerel").spin(false);
+            $("#spinnerdiv").hide();
+        }
+    }
+
+    // Create Dropzone function
+    Dropzone.options.myAwesomeDropzone = {
         maxFilesize: 5,//mb
         maxFiles:16,
         addRemoveLinks: false,
-        dictResponseError: 'Server not Configured',
+        dictResponseError: "Server not Configured",
         acceptedFiles: ".png,.jpg,.gif,.bmp,.jpeg",
         renameFilename: function (filename) {
-           return new Date().getTime() + '_' + filename;
+            return new Date().getTime() + '_' + filename;
         },
         init:function(){
             const self = this;
@@ -39,7 +66,7 @@ $(function() {
             self.options.dictRemoveFile = "Delete";
             //New file added
             self.on("addedfile", function (file) {
-                console.log('new file added ', file);
+                console.log("new file added ", file);
                 currGlobalFileSize+=file.size;
                 numFiles++;
                 $("#spinnerdiv").show();
@@ -47,7 +74,7 @@ $(function() {
             });
             // Send file starts
             self.on("sending", function (file) {
-                console.log('upload started', file);
+                console.log("upload started", file);
                 $('.meter').show();
             });
 
@@ -75,25 +102,13 @@ $(function() {
         },
         accept: function (file, done) {
             if (currGlobalFileSize >= maxGlobalFileSize ) {
-                return done('8MB total upload per request quota exceeded!');
+                return done("8MB total upload per request quota exceeded!");
             }
             return done();
         }
     };
 
-    // Events
-    // Reset dropzone
-    $("#resetDropzone").click(function(){
-        // $("#my-awesome-dropzone").load(location.href+" #my-awesome-dropzone>*","");
-        // $("#image-props").load(location.href+" #image-props>*","");
-        // setTimeout(function(){$("#spinnerdiv").hide();},50);
-        // currGlobalFileSize = 0;
-        // numFiles = 0;
-        // numClones = 1;
-        location.reload();
-    });
-
-    // Functions
+    // Clone HTML divs function
     function makeCloneDiv(appendDivId,cloneDivId,cloneCount) {
         const clone = $(`#${cloneDivId}`).clone(false);
         // change all id values to a new unique value by adding "_cloneX" to the end
@@ -106,46 +121,33 @@ $(function() {
             if (this.name) {
                 this.name = this.name +"_" + cloneCount;
             }
-
         });
-
         $(`#${appendDivId}`).append(clone);
     }
 
+    // Create GVARV card function
     function makeGVARVCard(appendDivId,cloneDivId,cloneCount,data,file) {
-        const clone = $(`#${cloneDivId}`).clone(false);
-        // change all id values to a new unique value by adding "_cloneX" to the end
-        // where X is a number that increases each time you make a clone
-        $("*", clone).add(clone).each(function() {
-            if (this.id) {
-                this.id = this.id + "_" + cloneCount;
 
-            }
-            if (this.name) {
-                this.name = this.name +"_" + cloneCount;
-            }
+        makeCloneDiv(appendDivId,cloneDivId,cloneCount);
 
-        });
-
-        $(`#${appendDivId}`).append(clone);
         $("#div_clone_"+cloneCount).show();
+
         // set data targets
-        $("#collapse_button_"+cloneCount).attr('data-target',"#foo_" + cloneCount);
-        $("#face-tab_"+cloneCount).attr('href',"#face-view_" + cloneCount);
-        $("#labels-tab_"+cloneCount).attr('href',"#labels-view_" + cloneCount);
-        $("#text-tab_"+cloneCount).attr('href',"#text-view_" + cloneCount);
-        $("#webmatch-tab_"+cloneCount).attr('href',"#webmatch-view_" + cloneCount);
-        $("#safesearch-tab_"+cloneCount).attr('href',"#safesearch-view_" + cloneCount);
-        $("#landmark-tab_"+cloneCount).attr('href',"#landmark-view_" + cloneCount);
-        $("#logo-tab_"+cloneCount).attr('href',"#logo-view_" + cloneCount);
-        $("#props-tab_"+cloneCount).attr('href',"#props-view_" + cloneCount);
-        $("#json-tab_"+cloneCount).attr('href',"#json-view_" + cloneCount);
+        $("#collapse_button_"+cloneCount).attr("data-target","#foo_" + cloneCount);
+        $("#face-tab_"+cloneCount).attr("href","#face-view_" + cloneCount);
+        $("#labels-tab_"+cloneCount).attr("href","#labels-view_" + cloneCount);
+        $("#text-tab_"+cloneCount).attr("href","#text-view_" + cloneCount);
+        $("#webmatch-tab_"+cloneCount).attr("href","#webmatch-view_" + cloneCount);
+        $("#safesearch-tab_"+cloneCount).attr("href","#safesearch-view_" + cloneCount);
+        $("#landmark-tab_"+cloneCount).attr("href","#landmark-view_" + cloneCount);
+        $("#logo-tab_"+cloneCount).attr("href","#logo-view_" + cloneCount);
+        $("#json-tab_"+cloneCount).attr("href","#json-view_" + cloneCount);
+
         //stop spinner
         $("#spinnerel").spin(false);
         $("#spinnerdiv").hide();
 
         // insert response data
-
         // Title and thumbnail
         const titleArr = data.cloudFileName.split(/(_)/);
         titleArr.shift();
@@ -154,8 +156,7 @@ $(function() {
         $("#gvarv_image_title_"+cloneCount).text(gvarvImageTitle);
         $("#gvarv_image_thumb_"+cloneCount).attr("src",data.imagePublicUrl);
 
-        // JSON tab
-        $("#json-view_"+cloneCount).append(renderjson(data));
+
 
         // Build tabs
         buildFaceTab ();
@@ -164,6 +165,10 @@ $(function() {
         buildWebTab ();
         buildSafeSearchTab ();
         buildLandmarksTab ();
+        buildLogosTab ();
+
+        // JSON tab
+        $("#json-view_"+cloneCount).append(renderjson(data));
 
         // Face tab
         // create new gvarv obj
@@ -226,153 +231,6 @@ $(function() {
             }
         }
 
-
-        // untied functions
-        // Liklihood
-        function getLikelihood(val){
-            switch (val) {
-                case "UNKNOWN":return 0;break;
-                case "VERY_UNLIKEL":return 0.2;break;
-                case "UNLIKELY":return 0.4;break;
-                case "POSSIBLE":return 0.6;break;
-                case "LIKELY":return 0.8;break;
-                case "VERY_LIKELY":return 1;break;
-                default:return 0;break;
-            }
-        }
-
-        function setPanAndZoomCanvasEvents(gvarvObj,countId) {
-            // pan and zoom events
-            $('#zoomIn_'+countId).click(function(){
-                gvarvObj.canvas.setZoom(gvarvObj.canvas.getZoom() * 1.1 ) ;
-            }) ;
-            $('#zoomOut_'+countId).click(function(){
-                gvarvObj.canvas.setZoom(gvarvObj.canvas.getZoom() / 1.1 ) ;
-            }) ;
-            $('#goRight_'+countId).click(function(){
-                const units = 10 ;
-                const delta = new fabric.Point(units,0) ;
-                gvarvObj.canvas.relativePan(delta) ;
-            }) ;
-            $('#goLeft_'+countId).click(function(){
-                const units = 10 ;
-                const delta = new fabric.Point(-units,0) ;
-                gvarvObj.canvas.relativePan(delta) ;
-            }) ;
-            $('#goUp_'+countId).click(function(){
-                const units = 10 ;
-                const delta = new fabric.Point(0,-units) ;
-                gvarvObj.canvas.relativePan(delta) ;
-            }) ;
-            $('#goDown_'+countId).click(function(){
-                const units = 10 ;
-                const delta = new fabric.Point(0,units) ;
-                gvarvObj.canvas.relativePan(delta) ;
-            }) ;
-        }
-
-        function buildLikelihoodChart(chartContainerId,dataArr) {
-            const likelihoodValues = {
-                0: 'UNKNOWN',
-                0.2: 'VERY_UNLIKELY',
-                0.4: 'UNLIKELY',
-                0.6: 'POSSIBLE',
-                0.8: 'LIKELY',
-                1: 'VERY_LIKELY'
-            };
-            Highcharts.chart(chartContainerId, {
-                chart: {
-                    type: 'bar'
-                },
-                title: {
-                    text: 'Likelihood'
-                },
-                xAxis: {
-                    categories: ['Joy', 'Sorrow', 'Anger', 'Surprise', 'Under-exposed','Blurred','Headwear'],
-                    title: {
-                        text: null
-                    }
-                },
-                yAxis: {
-                    labels: {
-                        formatter: function() {
-                            const value = likelihoodValues[this.value];
-                            return value !== 'undefined' ? value : this.value;
-                        }
-                    }
-                },
-                tooltip: {
-                    valueSuffix: ''
-                },
-                plotOptions: {
-                    bar: {
-                        dataLabels: {
-                            enabled: true
-                        }
-                    }
-                },
-                credits: {
-                    enabled: false
-                },
-                series: dataArr
-            });
-        }
-
-        function buildConfidenceChart (containerId,dataArr) {
-            Highcharts.chart(containerId, {
-                chart: {
-                    type: 'bar'
-                },
-                title: {
-                    text: 'Detection Confidence'
-                },
-                xAxis: {
-                    categories: ['Face Bounds','Facial Landmarks'],
-                    title: {
-                        text: null
-                    }
-                },
-                yAxis: {
-                    min: 0,
-                    max:1,
-                    title: {
-                        text: 'Confidence',
-                        align: 'high'
-                    },
-                    labels: {
-                        overflow: 'justify'
-                    }
-                },
-                tooltip: {
-                    valueSuffix: ''
-                },
-                plotOptions: {
-                    bar: {
-                        dataLabels: {
-                            enabled: true
-                        }
-                    }
-                },
-                credits: {
-                    enabled: false
-                },
-                series: dataArr
-            });
-        }
-
-        // build table for roll, tilt and pan angles
-        function buildAnglesTable (itemIndex,faceNum,obj) {
-            const $dataRow = $( `<tr><td>${faceNum}</td><td>${obj.panAngle}</td><td>${obj.rollAngle}</td><td>${obj.tiltAngle}</td></tr>`);
-            $("#anglesTable_"+itemIndex+" > tbody").append($dataRow);
-        }
-        // to limit angle to
-        function angle360 (angle) {
-            if (angle > 360 || angle < -360) {
-                return (angle - (360 * Math.floor(angle/360)))
-            }
-            return angle;
-        }
-
         // Labels tab
         function buildLabelsTab () {
             if (data.responses[0].labelAnnotations.length > 0) {
@@ -390,55 +248,7 @@ $(function() {
             }
         }
 
-
-        function buildLabelsGraph (containerId,seriesData) {
-            Highcharts.chart(containerId, {
-                chart: {
-                    type: 'bar'
-                },
-                title: {
-                    text: 'Labels'
-                },
-                xAxis: {
-                    tickInterval: 1,
-                    labels: {
-                        enabled: true,
-                        formatter: function() { return seriesData[this.value][0];},
-                    }
-                },
-                yAxis: {
-                    min: 0,
-                    max:1,
-                    title: {
-                        text: 'Confidence',
-                        align: 'high'
-                    },
-                    labels: {
-                        overflow: 'justify'
-                    }
-                },
-                tooltip: {
-                    valueSuffix: ''
-                },
-                plotOptions: {
-                    bar: {
-                        dataLabels: {
-                            enabled: true
-                        }
-                    }
-                },
-                credits: {
-                    enabled: false
-                },
-                series: [{
-                    name:"Detection Confidence",
-                    data:seriesData
-                }]
-            });
-        }
-
         // Text tab
-
         function buildTextTab () {
             if (data.responses[0].textAnnotations.length > 0) {
                 const gvarv = new Gvarv("text_canvas_"+cloneCount);
@@ -480,8 +290,7 @@ $(function() {
             }
         }
 
-        // Web match tab
-
+        // Web tab
         function buildWebTab () {
             if (data.responses[0].webDetection.webEntities.length > 0) {
                 $("#num_webmatch_id_"+cloneCount).text(data.responses[0].webDetection.fullMatchingImages.length + data.responses[0].webDetection.partialMatchingImages.length + data.responses[0].webDetection.pagesWithMatchingImages.length);
@@ -536,6 +345,327 @@ $(function() {
             }
         }
 
+        // Safesearch tab
+        function buildSafeSearchTab () {
+            if(data.responses[0].safeSearchAnnotation !== null) {
+                $("#num_safesearch_id_"+cloneCount).text("✓");
+                const el = data.responses[0].safeSearchAnnotation;
+                let likelihoodArr = [];
+                let barChartDataObjArr = [];
+                likelihoodArr.push(getLikelihood(el.adult));
+                likelihoodArr.push(getLikelihood(el.spoof));
+                likelihoodArr.push(getLikelihood(el.medical));
+                likelihoodArr.push(getLikelihood(el.violence));
+                barChartDataObjArr.push({name:"Safe Search", data: likelihoodArr});
+                buildSafesearchLikelihoodChart("safesearchChartContainer_"+cloneCount, barChartDataObjArr);
+            } else {
+                $("#safesearch-view_"+cloneCount)
+                    .empty()
+                    .append("<h3 class='text-center no-data' >NONE DETECTED</h3>");
+            }
+        }
+
+        // Landmarks tab
+        function buildLandmarksTab () {
+            if(data.responses[0].landmarkAnnotations.length > 0) {
+                $("#num_landmarks_id_"+cloneCount).text(data.responses[0].landmarkAnnotations.length);
+                const gvarv = new Gvarv("landmarks_canvas_"+cloneCount);
+                applyZoom(gvarv.canvas,"landmarksCanvasContainer_"+cloneCount);
+                setPanAndZoomCanvasEvents(gvarv, `landmarks_${cloneCount}`);
+
+                gvarv.addImageToCanvas(data.imagePublicUrl,file.width,file.height).then(function(oImg) {
+                    const gvarv_group = gvarv.addGroup([oImg]);
+                    data.responses[0].landmarkAnnotations.forEach(function(landmark,i){
+                        gvarv_group.addWithUpdate(gvarv.addLandmarkPoly(landmark.boundingPoly.vertices, "lightgreen"));
+                        gvarv_group.addWithUpdate(gvarv.addPolyNumber(`${++i}`, landmark.boundingPoly.vertices[0]));
+                        $(`#landmarkScoreRow_${cloneCount}`)
+                            .append(`
+                                <div class="col-sm-4"><p>Landmark ${i} Confidence Score: </p></div>
+                                <div class="col-sm-8"><p>${landmark.score}</p></div>
+                            `);
+                        $(`#landmarkDescriptionRow_${cloneCount}`).append(`
+                                <div class="col-sm-4"><p>Landmark ${i} Description: </p></div>
+                                <div class="col-sm-8"><p>${landmark.description}</p></div>
+                            `);
+                        const mapDiv = initGoogleLandmarkMapContainer(cloneCount,i);
+                        const initMapObj = {
+                            mapDiv,
+                            lat: landmark.locations[0].latLng.latitude,
+                            lng: landmark.locations[0].latLng.longitude
+                        };
+                        allGoogleMapObj.push(initMapObj);
+                        // Map events
+                        $(`.mapPanelTitle`).on('click', function () {
+                            if ($(`.mapPanelTitle`).hasClass("panel-closed")) {
+                                console.log("panel opened!");
+                                $(`.mapPanelTitle`).removeClass("panel-closed");
+                                const idArr = this.id.split("_");
+                                console.log("all", allGoogleMapObj);
+                                initializeGoogleMap(allGoogleMapObj[parseInt(idArr[3])-1]);
+                            } else {
+                                $(`.mapPanelTitle`).addClass("panel-closed")
+                            }
+
+                        });
+                    });
+                    gvarv.canvas.add(gvarv_group);
+
+                },function(err){
+                    console.log(err);
+                });
+            } else {
+                $("#landmark-view_"+cloneCount)
+                    .empty()
+                    .append("<h3 class='text-center no-data' >NONE DETECTED</h3>");
+            }
+        }
+
+        // Logos Tab
+        function buildLogosTab () {
+            if(data.responses[0].logoAnnotations.length > 0) {
+                $("#num_logos_id_"+cloneCount).text(data.responses[0].logoAnnotations.length);
+                const gvarv = new Gvarv("logo_canvas_"+cloneCount);
+                applyZoom(gvarv.canvas,"logoCanvasContainer_"+cloneCount);
+                setPanAndZoomCanvasEvents(gvarv, `logo_${cloneCount}`);
+
+                gvarv.addImageToCanvas(data.imagePublicUrl,file.width,file.height).then(function(oImg) {
+                    const gvarv_group = gvarv.addGroup([oImg]);
+                    data.responses[0].logoAnnotations.forEach(function(logo,i){
+                        gvarv_group.addWithUpdate(gvarv.addLogoPoly(logo.boundingPoly.vertices, "lightgreen"));
+                        gvarv_group.addWithUpdate(gvarv.addPolyNumber(`${++i}`, logo.boundingPoly.vertices[0]));
+                        $(`#logoScoreRow_${cloneCount}`).append(`
+                                <div class="col-sm-4"><p>Logo ${i} Confidence Score: </p></div>
+                                <div class="col-sm-8"><p>${logo.score}</p></div>
+                            `);
+                        $(`#logoDescriptionRow_${cloneCount}`).append(`
+                                <div class="col-sm-4"><p>Logo ${i} Description: </p></div>
+                                <div class="col-sm-8"><p>${logo.description}</p></div>
+                            `);
+                    });
+                    gvarv.canvas.add(gvarv_group);
+
+                },function(err){
+                    console.log(err);
+                });
+            } else {
+                $("#logo-view_"+cloneCount)
+                    .empty()
+                    .append("<h3 class='text-center no-data' >NONE DETECTED</h3>");
+            }
+
+        }
+
+
+        // ----------------------------------------------sub functions
+
+        // build table for roll, tilt and pan angles
+        function buildAnglesTable (itemIndex,faceNum,obj) {
+            const $dataRow = $( `<tr><td>${faceNum}</td><td>${obj.panAngle}</td><td>${obj.rollAngle}</td><td>${obj.tiltAngle}</td></tr>`);
+            $("#anglesTable_"+itemIndex+" > tbody").append($dataRow);
+        }
+        // to limit angle to
+        function angle360 (angle) {
+            if (angle > 360 || angle < -360) {
+                return (angle - (360 * Math.floor(angle/360)))
+            }
+            return angle;
+        }
+
+        // Liklihood
+        function getLikelihood(val){
+            switch (val) {
+                case "UNKNOWN":return 0;break;
+                case "VERY_UNLIKEL":return 0.2;break;
+                case "UNLIKELY":return 0.4;break;
+                case "POSSIBLE":return 0.6;break;
+                case "LIKELY":return 0.8;break;
+                case "VERY_LIKELY":return 1;break;
+                default:return 0;break;
+            }
+        }
+
+        function setPanAndZoomCanvasEvents(gvarvObj,countId) {
+            // pan and zoom events
+            $("#zoomIn_"+countId).click(function(){
+                gvarvObj.canvas.setZoom(gvarvObj.canvas.getZoom() * 1.1 ) ;
+            }) ;
+            $("#zoomOut_"+countId).click(function(){
+                gvarvObj.canvas.setZoom(gvarvObj.canvas.getZoom() / 1.1 ) ;
+            }) ;
+            $("#goRight_"+countId).click(function(){
+                const units = 10 ;
+                const delta = new fabric.Point(units,0) ;
+                gvarvObj.canvas.relativePan(delta) ;
+            }) ;
+            $("#goLeft_"+countId).click(function(){
+                const units = 10 ;
+                const delta = new fabric.Point(-units,0) ;
+                gvarvObj.canvas.relativePan(delta) ;
+            }) ;
+            $("#goUp_"+countId).click(function(){
+                const units = 10 ;
+                const delta = new fabric.Point(0,-units) ;
+                gvarvObj.canvas.relativePan(delta) ;
+            }) ;
+            $("#goDown_"+countId).click(function(){
+                const units = 10 ;
+                const delta = new fabric.Point(0,units) ;
+                gvarvObj.canvas.relativePan(delta) ;
+            }) ;
+        }
+
+        // build landmarks map
+        function initGoogleLandmarkMapContainer(cloneCount,itemCount) {
+            $(`#landmarkMapAccordion_${cloneCount}`).append(`
+              <div class="panel panel-default">
+                <div class="panel-heading" role="tab">
+                    <h4 class="panel-title "><a id="map_panel_${cloneCount}_${itemCount}" class="mapPanelTitle panel-closed" role="button" data-toggle="collapse" data-parent="#landmarkMapAccordion_${cloneCount}" aria-expanded="false" href="#landmarkMapAccordion_${cloneCount} .item-${itemCount}">Map Of Landmark ${itemCount}</a></h4>
+                </div>
+                <div class="panel-collapse collapse item-${itemCount}" role="tabpanel">
+                    <div id="landmarksMapContainer_${cloneCount}_${itemCount}" style="height: 400px; margin:0 auto"></div>
+                </div>
+            </div>
+        `);
+            return `landmarksMapContainer_${cloneCount}_${itemCount}`;
+        }
+
+        // ------------------------------------ Charts and Graphs sub functions
+
+        function buildLikelihoodChart(chartContainerId,dataArr) {
+            const likelihoodValues = {
+                0: "UNKNOWN",
+                0.2: "VERY_UNLIKELY",
+                0.4: "UNLIKELY",
+                0.6: "POSSIBLE",
+                0.8: "LIKELY",
+                1: "VERY_LIKELY"
+            };
+            Highcharts.chart(chartContainerId, {
+                chart: {
+                    type: "bar"
+                },
+                title: {
+                    text: "Likelihood"
+                },
+                xAxis: {
+                    categories: ["Joy", "Sorrow", "Anger", "Surprise", "Under-exposed","Blurred","Headwear"],
+                    title: {
+                        text: null
+                    }
+                },
+                yAxis: {
+                    labels: {
+                        formatter: function() {
+                            const value = likelihoodValues[this.value];
+                            return value !== "undefined" ? value : this.value;
+                        }
+                    }
+                },
+                tooltip: {
+                    valueSuffix: ""
+                },
+                plotOptions: {
+                    bar: {
+                        dataLabels: {
+                            enabled: true
+                        }
+                    }
+                },
+                credits: {
+                    enabled: false
+                },
+                series: dataArr
+            });
+        }
+
+        function buildConfidenceChart (containerId,dataArr) {
+            Highcharts.chart(containerId, {
+                chart: {
+                    type: "bar"
+                },
+                title: {
+                    text: "Detection Confidence"
+                },
+                xAxis: {
+                    categories: ["Face Bounds","Facial Landmarks"],
+                    title: {
+                        text: null
+                    }
+                },
+                yAxis: {
+                    min: 0,
+                    max:1,
+                    title: {
+                        text: "Confidence",
+                        align: "high"
+                    },
+                    labels: {
+                        overflow: "justify"
+                    }
+                },
+                tooltip: {
+                    valueSuffix: ""
+                },
+                plotOptions: {
+                    bar: {
+                        dataLabels: {
+                            enabled: true
+                        }
+                    }
+                },
+                credits: {
+                    enabled: false
+                },
+                series: dataArr
+            });
+        }
+
+        function buildLabelsGraph (containerId,seriesData) {
+            Highcharts.chart(containerId, {
+                chart: {
+                    type: "bar"
+                },
+                title: {
+                    text: "Labels"
+                },
+                xAxis: {
+                    tickInterval: 1,
+                    labels: {
+                        enabled: true,
+                        formatter: function() { return seriesData[this.value][0];},
+                    }
+                },
+                yAxis: {
+                    min: 0,
+                    max:1,
+                    title: {
+                        text: "Confidence",
+                        align: "high"
+                    },
+                    labels: {
+                        overflow: "justify"
+                    }
+                },
+                tooltip: {
+                    valueSuffix: ""
+                },
+                plotOptions: {
+                    bar: {
+                        dataLabels: {
+                            enabled: true
+                        }
+                    }
+                },
+                credits: {
+                    enabled: false
+                },
+                series: [{
+                    name:"Detection Confidence",
+                    data:seriesData
+                }]
+            });
+        }
+
         function buildWebMatchGraph (containerId,seriesData) {
             Highcharts.chart(containerId, {
                 chart: {
@@ -581,46 +711,24 @@ $(function() {
             });
         }
 
-
-        function buildSafeSearchTab () {
-            if(data.responses[0].safeSearchAnnotation !== null) {
-                $("#num_safesearch_id_"+cloneCount).text("✓");
-                const el = data.responses[0].safeSearchAnnotation;
-                let likelihoodArr = [];
-                let barChartDataObjArr = [];
-                likelihoodArr.push(getLikelihood(el.adult));
-                likelihoodArr.push(getLikelihood(el.spoof));
-                likelihoodArr.push(getLikelihood(el.medical));
-                likelihoodArr.push(getLikelihood(el.violence));
-                barChartDataObjArr.push({name:"Safe Search", data: likelihoodArr});
-                buildSafesearchLikelihoodChart("safesearchChartContainer_"+cloneCount, barChartDataObjArr);
-            } else {
-                $("#safesearch-view_"+cloneCount)
-                    .empty()
-                    .append("<h3 class='text-center no-data' >NONE DETECTED</h3>");
-            }
-
-
-        }
-
         function buildSafesearchLikelihoodChart (chartContainerId,dataArr) {
             const likelihoodValues = {
-                0: 'UNKNOWN',
-                0.2: 'VERY_UNLIKELY',
-                0.4: 'UNLIKELY',
-                0.6: 'POSSIBLE',
-                0.8: 'LIKELY',
-                1: 'VERY_LIKELY'
+                0: "UNKNOWN",
+                0.2: "VERY_UNLIKELY",
+                0.4: "UNLIKELY",
+                0.6: "POSSIBLE",
+                0.8: "LIKELY",
+                1: "VERY_LIKELY"
             };
             Highcharts.chart(chartContainerId, {
                 chart: {
-                    type: 'bar'
+                    type: "bar"
                 },
                 title: {
-                    text: 'Safe Search Likelihood'
+                    text: "Safe Search Likelihood"
                 },
                 xAxis: {
-                    categories: ['adult','spoof','medical','violence'],
+                    categories: ["adult","spoof","medical","violence"],
                     title: {
                         text: null
                     }
@@ -629,12 +737,12 @@ $(function() {
                     labels: {
                         formatter: function() {
                             const value = likelihoodValues[this.value];
-                            return value !== 'undefined' ? value : this.value;
+                            return value !== "undefined" ? value : this.value;
                         }
                     }
                 },
                 tooltip: {
-                    valueSuffix: ''
+                    valueSuffix: ""
                 },
                 plotOptions: {
                     bar: {
@@ -650,87 +758,5 @@ $(function() {
             });
         }
 
-        // Build Landmarks tab
-
-        function buildLandmarksTab () {
-            if(data.responses[0].landmarkAnnotations.length > 0) {
-                $("#num_landmarks_id_"+cloneCount).text(data.responses[0].landmarkAnnotations.length);
-                const gvarv = new Gvarv("landmarks_canvas_"+cloneCount);
-                applyZoom(gvarv.canvas,"landmarksCanvasContainer_"+cloneCount);
-                setPanAndZoomCanvasEvents(gvarv, `landmarks_${cloneCount}`);
-
-                gvarv.addImageToCanvas(data.imagePublicUrl,file.width,file.height).then(function(oImg) {
-                    const gvarv_group = gvarv.addGroup([oImg]);
-                    data.responses[0].landmarkAnnotations.forEach(function(landmark,i){
-                        gvarv_group.addWithUpdate(gvarv.addLandmarkPoly(landmark.boundingPoly.vertices, "lightgreen"));
-                        gvarv_group.addWithUpdate(gvarv.addPolyNumber(`${++i}`, landmark.boundingPoly.vertices[0]));
-                        $(`#landmarkScoreRow_${cloneCount}`).append(`
-                        <div class="col-sm-4"><p>Landmark ${i} Score: </p></div>
-                        <div class="col-sm-8"><p>${landmark.score}</p></div>
-                    `);
-                        const mapDiv = initGoogleLandmarkMapContainer(cloneCount,i);
-                        const initMapObj = {
-                            mapDiv,
-                            lat: landmark.locations[0].latLng.latitude,
-                            lng: landmark.locations[0].latLng.longitude
-                        };
-                        allGoogleMapObj.push(initMapObj);
-                        // Map events
-                        $(`.mapPanelTitle`).on('click', function () {
-                            if ($(`.mapPanelTitle`).hasClass("panel-closed")) {
-                                console.log("panel opened!");
-                                $(`.mapPanelTitle`).removeClass("panel-closed");
-                                const idArr = this.id.split("_");
-                                console.log("all", allGoogleMapObj);
-                                initializeGoogleMap(allGoogleMapObj[parseInt(idArr[3])-1]);
-                            } else {
-                                $(`.mapPanelTitle`).addClass("panel-closed")
-                            }
-
-                        });
-                    });
-                    gvarv.canvas.add(gvarv_group);
-
-                },function(err){
-                    console.log(err);
-                });
-            } else {
-                $("#safesearch-view_"+cloneCount)
-                    .empty()
-                    .append("<h3 class='text-center no-data' >NONE DETECTED</h3>");
-            }
-
-        }
-
-        // build landmarks map
-        function initGoogleLandmarkMapContainer(cloneCount,itemCount) {
-            $(`#landmarkMapAccordion_${cloneCount}`).append(`
-              <div class="panel panel-default">
-                <div class="panel-heading" role="tab">
-                    <h4 class="panel-title "><a id="map_panel_${cloneCount}_${itemCount}" class="mapPanelTitle panel-closed" role="button" data-toggle="collapse" data-parent="#landmarkMapAccordion_${cloneCount}" aria-expanded="false" href="#landmarkMapAccordion_${cloneCount} .item-${itemCount}">Map Of Landmark ${itemCount}</a></h4>
-                </div>
-                <div class="panel-collapse collapse item-${itemCount}" role="tabpanel">
-                    <div id="landmarksMapContainer_${cloneCount}_${itemCount}" style="height: 400px; margin:0 auto"></div>
-                </div>
-            </div>
-        `);
-            return `landmarksMapContainer_${cloneCount}_${itemCount}`;
-        }
     }
-
-    // Google Landmark maps
-    function initializeGoogleMap(obj) {
-        // $(`#${obj.mapDiv}`).load(location.href + `#${obj.mapDiv}`);
-        const uluru = {lat: obj.lat, lng: obj.lng};
-        const map = new google.maps.Map(document.getElementById(obj.mapDiv), {
-            zoom: 8,
-            center: uluru
-        });
-        const marker = new google.maps.Marker({
-            position: uluru,
-            map: map
-        });
-    }
-
-
 });

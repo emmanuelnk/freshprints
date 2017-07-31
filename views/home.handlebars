@@ -60,7 +60,6 @@
                                     <span class="icon-bar"></span>
                                     <span class="icon-bar"></span>
                                     <span class="icon-bar"></span>
-                                    <span class="icon-bar"></span>
                                 </button>
                             </div>
                         </div>
@@ -89,9 +88,6 @@
                             </li>
                             <li>
                                 <a id="logo-tab" data-toggle="tab" href="#logo-view">Logos<span id="num_logos_id" class="badge gvarv_badge"></span></a>
-                            </li>
-                            <li>
-                                <a id="props-tab" data-toggle="tab" href="#props-view">Props</a>
                             </li>
                             <li>
                                 <a id="json-tab" data-toggle="tab" href="#json-view">JSON</a>
@@ -174,16 +170,27 @@
                             <div id="landmarksCanvasContainer" style="border: dotted gray thin;height:400px;overflow: hidden">
                                 <canvas id="landmarks_canvas"></canvas>
                             </div>
-                            <div id="landmarkScoreRow" class="row">
-                            </div>
+                            <div id="landmarkScoreRow" class="row"></div>
+                            <div id="landmarkDescriptionRow" class="row"></div>
+
                             <div class="panel-group" role="tablist" aria-multiselectable="true" id="landmarkMapAccordion">
                             </div>
                         </div>
                         <div id="logo-view" class="tab-pane fade panel-body">
-                            <p>7. Coming Soon</p>
-                        </div>
-                        <div id="props-view" class="tab-pane fade panel-body">
-                            <p>8. Coming Soon</p>
+                            <div style="margin:10px 0;">
+                                <h4>Use the the mouse and mousewheel or buttons below to pan and zoom</h4>
+                                <button id="zoomIn_text" class="btn btn-sm">+</button>
+                                <button id="zoomOut_text" class="btn btn-sm">-</button>
+                                <button id="goLeft_text" class="btn btn-sm"><</button>
+                                <button id="goRight_text" class="btn btn-sm">></button>
+                                <button id="goUp_text" class="btn btn-sm">^</button>
+                                <button id="goDown_text" class="btn btn-sm">v</button>
+                            </div>
+                            <div id="logoCanvasContainer" style="border: dotted gray thin;height:400px;overflow: hidden">
+                                <canvas id="logo_canvas"></canvas>
+                            </div>
+                            <div id="logoScoreRow" class="row"></div>
+                            <div id="logoDescriptionRow" class="row"></div>
                         </div>
                         <div id="json-view" class="tab-pane fade panel-body">
                         </div>
