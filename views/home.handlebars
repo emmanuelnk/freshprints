@@ -24,7 +24,10 @@
     <div class="col-sm-12 col-md-6">
       <div class="panel">
         <div class="panel-body">
-          <h3>Drop Images</h3>
+            <div class="row">
+                <div class="col-sm-12 col-md-6"><h3>Drop Images</h3></div>
+                <div class="col-sm-12 col-md-6"><button class="btn btn-primary pull-right" id="resetDropzone">Reset</button></div>
+            </div>
             <form action="/file-upload"
                   class="dropzone"
                   id="my-awesome-dropzone">
@@ -35,9 +38,164 @@
     </div>
     <div class="col-sm-12 col-md-6">
         <div class="panel">
-            <div id="image-props" class="panel-body">
-                <h3>Image Properties (JSON)</h3>
+            <div id="image-props" style="position: relative;" class="panel-body">
+                <h3>Analysis</h3>
                 <h5>Click + symbol to expand</h5>
+                <div class="row">
+                    <div style="padding:5px;" id="spinnerdiv"><span style="margin-top:38px;" class="pull-left" id="spinnerel"></span><p id="spinnertext" class="pull-right">Analyzing Images ...</p> </div>
+                </div>
+                <div id="div_clone" class="gvarv_clones panel panel-default card-panel">
+                    <header class="panel-heading tabbed-heading">
+                        <div class="row">
+                            <div class="col-md-2"><img id="gvarv_image_thumb" src="http://via.placeholder.com/350x350" class="img-rounded" width="50" height="50"></div>
+                            <div class="col-md-8"><h4 id="gvarv_image_title" style="font-weight:400;font-style: italic;word-wrap:break-word;">Image Title</h4></div>
+                            <div class="col-md-2">
+                                <button id="collapse_button" type="button" class="collapsed heading-toggle btn btn-default btn pull-right" data-toggle="collapse" data-target="#foo">
+                                    Expand
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="panel-heading-toggle">
+                            <ul class="nav active-tab"></ul>
+                        </div>
+
+                        <ul class="nav nav-tabs ">
+                            <li class="active">
+                                <a id="face-tab" data-toggle="tab" href="#face-view">Faces<span id="num_faces_id" class="badge gvarv_badge"></span></a>
+                            </li>
+                            <li >
+                                <a id="labels-tab" data-toggle="tab" href="#labels-view">Labels<span id="num_labels_id" class="badge gvarv_badge"></span></a>
+                            </li>
+                            <li >
+                                <a id="text-tab" data-toggle="tab" href="#text-view">Text<span id="num_text_id" class="badge gvarv_badge"></span></a>
+                            </li>
+                            <li >
+                                <a id="webmatch-tab" data-toggle="tab" href="#webmatch-view">Web<span id="num_webmatch_id" class="badge gvarv_badge"></span></a>
+                            </li>
+                            <li >
+                                <a id="safesearch-tab" data-toggle="tab" href="#safesearch-view">Safe Search<span id="num_safesearch_id" class="badge gvarv_badge"></span></a>
+                            </li>
+                            <li >
+                                <a id="landmark-tab" data-toggle="tab" href="#landmark-view">Landmarks<span id="num_landmarks_id" class="badge gvarv_badge"></span></a>
+                            </li>
+                            <li>
+                                <a id="logo-tab" data-toggle="tab" href="#logo-view">Logos<span id="num_logos_id" class="badge gvarv_badge"></span></a>
+                            </li>
+                            <li>
+                                <a id="json-tab" data-toggle="tab" href="#json-view">JSON</a>
+                            </li>
+                        </ul>
+                    </header>
+
+                    <div class="tab-content collapse" id="foo">
+                        <div id="face-view" class="tab-pane fade panel-body active in">
+                            <div style="margin:10px 0;">
+                                <h4>Use the the mouse and mousewheel or buttons below to pan and zoom. Every detected face has a number in top left corner of its bounding box</h4>
+                                <button id="zoomIn_face" class="btn btn-sm">+</button>
+                                <button id="zoomOut_face" class="btn btn-sm">-</button>
+                                <button id="goLeft_face" class="btn btn-sm"><</button>
+                                <button id="goRight_face" class="btn btn-sm">></button>
+                                <button id="goUp_face" class="btn btn-sm">^</button>
+                                <button id="goDown_face" class="btn btn-sm">v</button>
+                            </div>
+
+                            <div id="canvasContainer" style="border: dotted gray thin;height:400px;overflow: hidden">
+                                <canvas id="face_canvas"></canvas>
+                            </div>
+                            <div id="confidenceChartContainer" style="min-width: 200px; max-width: 800px; height: 400px; margin:25px auto"></div>
+                            <div id="chartContainer" style="min-width: 200px; max-width: 800px; height: 400px; margin:25px auto"></div>
+                            <div id="anglesTableContainer">
+                                <table id="anglesTable" class="table table-bordered table-responsive">
+                                    <thead>
+                                    <tr>
+                                        <th>Face</th>
+                                        <th>Pan</th>
+                                        <th>Roll</th>
+                                        <th>Tilt</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div id="labels-view" class="tab-pane fade panel-body">
+                            <div id="labelsChartContainer" style="min-width: 200px; max-width: 800px; height: 400px; margin:25px auto"></div>
+                        </div>
+                        <div id="text-view" class="tab-pane fade panel-body">
+                            <div style="margin:10px 0;">
+                                <h4>Use the the mouse and mousewheel or buttons below to pan and zoom</h4>
+                                <button id="zoomIn_text" class="btn btn-sm">+</button>
+                                <button id="zoomOut_text" class="btn btn-sm">-</button>
+                                <button id="goLeft_text" class="btn btn-sm"><</button>
+                                <button id="goRight_text" class="btn btn-sm">></button>
+                                <button id="goUp_text" class="btn btn-sm">^</button>
+                                <button id="goDown_text" class="btn btn-sm">v</button>
+                            </div>
+                            <div id="textCanvasContainer" style="border: dotted gray thin;height:400px;overflow: hidden">
+                                <canvas id="text_canvas"></canvas>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4"><p style="font-weight:400;">Detected Text:</p></div>
+                                <div class="col-md-8"><p id="detectedTextParagraph"></p></div>
+                            </div>
+                        </div>
+                        <div id="webmatch-view" class="tab-pane fade panel-body">
+                            <div id="webmatchChartContainer" style="min-width: 200px; max-width: 800px; height: 400px; margin:25px auto"></div>
+                            <div class="panel-group" role="tablist" aria-multiselectable="true" id="webMatchAccordion">
+                            </div>
+                        </div>
+                        <div id="safesearch-view" class="tab-pane fade panel-body">
+                            <div id="safesearchChartContainer" style="min-width: 200px; max-width: 800px; height: 400px; margin:25px auto"></div>
+                        </div>
+                        <div id="landmark-view" class="tab-pane fade panel-body">
+                            <div style="margin:10px 0;">
+                                <h4>Use the the mouse and mousewheel or buttons below to pan and zoom</h4>
+                                <button id="zoomIn_text" class="btn btn-sm">+</button>
+                                <button id="zoomOut_text" class="btn btn-sm">-</button>
+                                <button id="goLeft_text" class="btn btn-sm"><</button>
+                                <button id="goRight_text" class="btn btn-sm">></button>
+                                <button id="goUp_text" class="btn btn-sm">^</button>
+                                <button id="goDown_text" class="btn btn-sm">v</button>
+                            </div>
+                            <div id="landmarksCanvasContainer" style="border: dotted gray thin;height:400px;overflow: hidden">
+                                <canvas id="landmarks_canvas"></canvas>
+                            </div>
+                            <div id="landmarkScoreRow" class="row"></div>
+                            <div id="landmarkDescriptionRow" class="row"></div>
+
+                            <div class="panel-group" role="tablist" aria-multiselectable="true" id="landmarkMapAccordion">
+                            </div>
+                        </div>
+                        <div id="logo-view" class="tab-pane fade panel-body">
+                            <div style="margin:10px 0;">
+                                <h4>Use the the mouse and mousewheel or buttons below to pan and zoom</h4>
+                                <button id="zoomIn_text" class="btn btn-sm">+</button>
+                                <button id="zoomOut_text" class="btn btn-sm">-</button>
+                                <button id="goLeft_text" class="btn btn-sm"><</button>
+                                <button id="goRight_text" class="btn btn-sm">></button>
+                                <button id="goUp_text" class="btn btn-sm">^</button>
+                                <button id="goDown_text" class="btn btn-sm">v</button>
+                            </div>
+                            <div id="logoCanvasContainer" style="border: dotted gray thin;height:400px;overflow: hidden">
+                                <canvas id="logo_canvas"></canvas>
+                            </div>
+                            <div id="logoScoreRow" class="row"></div>
+                            <div id="logoDescriptionRow" class="row"></div>
+                        </div>
+                        <div id="json-view" class="tab-pane fade panel-body">
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
