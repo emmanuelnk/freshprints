@@ -23,17 +23,20 @@ const multer = Multer({
 });
 // Load environment variables from .env file
 dotenv.load();
-
+const gconfig = {
+    projectId: 'fresh-prints-image-analyzer',
+    credentials: JSON.parse(process.env.GCLOUD_CONFIG)
+};
 // -------------    Google Cloud APIs  ---------------------
 //API_key
 // const API_key = require("./sensitive/API_key");
-const Storage = require("@google-cloud/storage")(process.env.GCLOUD_CONFIG);
-const Vision = require('@google-cloud/vision')(process.env.GCLOUD_CONFIG);
+const Storage = require("@google-cloud/storage")(gconfig);
+const Vision = require('@google-cloud/vision')(gconfig);
 // Instantiate a storage client
-const storage = Storage();
-const vision = Vision();
+// const storage = Storage();
+// const vision = Vision();
 // A bucket is a container for objects (files).
-const bucket = storage.bucket(process.env.GCLOUD_STORAGE_BUCKET);
+const bucket = Storage.bucket(process.env.GCLOUD_STORAGE_BUCKET);
 // ----------------------  END ----------------------------
 
 // Controllers
@@ -144,7 +147,7 @@ app.post("/file-upload", multer.single("file"), (req, res, next) => {
             image: {source: {imageUri: gsLink}},
             features: visionImageFeatures,
         };
-        vision.annotate(request).then(response => {
+        Vision.annotate(request).then(response => {
             // doThingsWith(response);
             visionObj.cloudFileName = blob.name;
             visionObj.imagePublicUrl = imagePublicUrl;
