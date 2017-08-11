@@ -25,7 +25,10 @@ const multer = Multer({
 dotenv.load();
 const gconfig = {
     projectId: 'fresh-prints-image-analyzer',
-    credentials: JSON.parse(process.env.GCLOUD_CONFIG)
+    credentials: {
+        private_key: process.env.GCLOUD_PRIVATE_KEY.replace(/\\n/g, '\n'),
+        client_email: process.env.GCLOUD_CLIENT_EMAIL
+    }
 };
 // -------------    Google Cloud APIs  ---------------------
 //API_key
