@@ -26,9 +26,9 @@ dotenv.load();
 
 // -------------    Google Cloud APIs  ---------------------
 //API_key
-const API_key = require("./sensitive/API_key");
-const Storage = require("@google-cloud/storage");
-const Vision = require('@google-cloud/vision');
+// const API_key = require("./sensitive/API_key");
+const Storage = require("@google-cloud/storage")(process.env.GCLOUD_CONFIG);
+const Vision = require('@google-cloud/vision')(process.env.GCLOUD_CONFIG);
 // Instantiate a storage client
 const storage = Storage();
 const vision = Vision();
