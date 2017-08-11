@@ -20,7 +20,12 @@ const Multer = require("multer");
 const aliOssStorage = require("multer-ali-oss");
 const upload = Multer( {
     storage: aliOssStorage({
-        config: JSON.parse(process.env.ALI_CLOUD_ACCESS_CONFIG),
+        config: {
+            accessKeyId: process.env.ALI_CLOUD_OSS_ACCESSKEY_ID,
+            accessKeySecret:process.env.ALI_CLOUD_OSS_ACCESSKEY_SECRET,
+            bucket: process.env.ALI_CLOUD_OSS_BUCKET,
+            region: process.env.ALI_CLOUD_OSS_REGION
+        },
         filename: function (req, file, cb) {
             cb(null, file.fieldname + "-" + Date.now())
         }
