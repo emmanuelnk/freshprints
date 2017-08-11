@@ -11,18 +11,30 @@ const flash = require("express-flash");
 const bodyParser = require("body-parser");
 const expressValidator = require("express-validator");
 const dotenv = require("dotenv");
+dotenv.load();
 const exphbs = require("express-handlebars");
 // const mongoose = require("mongoose");
 const format = require("util").format;
 const Multer = require("multer");
-const multer = Multer({
-    storage: Multer.memoryStorage(),
-    limits: {
-        fileSize: 5 * 1024 * 1024 // no larger than 5mb, you can change as needed.
-    }
-});
+
+const aliOssStorage = require("multer-ali-oss");
+const upload = Multer( {
+    storage: aliOssStorage({
+        config: JSON.parse(process.env.ALI_CLOUD_ACCESS_CONFIG),
+        filename: function (req, file, cb) {
+            cb(null, file.fieldname + "-" + Date.now())
+        }
+    })
+}).single("file");
+
+// const multer = Multer({
+//     storage: Multer.memoryStorage(),
+//     limits: {
+//         fileSize: 5 * 1024 * 1024 // no larger than 5mb, you can change as needed.
+//     }
+// });
 // Load environment variables from .env file
-dotenv.load();
+
 const gconfig = {
     projectId: 'fresh-prints-image-analyzer',
     credentials: {
@@ -84,30 +96,14 @@ app.get("/about", aboutController.contactGet);
 app.post("/contact", contactController.contactPost);
 
 // app requests
+app.post("/ali-upload", (req, res, next)=>{
+    upload(req, res, function (err) {
+        if (err) {
+            // handle error 
+        }
 
-// Process the file upload and upload to Google Cloud Storage.
-app.post("/file-upload", multer.single("file"), (req, res, next) => {
-    if (!req.file) {
-        res.status(400).send("No file uploaded.");
-        return;
-    }
-
-    // Create a new blob in the bucket and upload the file data.
-    const blob = bucket.file(req.file.originalname);
-    const blobStream = blob.createWriteStream();
-
-    blobStream.on("error", (err) => {
-        next(err);
-    });
-
-    blobStream.on("finish", () => {
-        // The public URL can be used to directly access the file via HTTP.
-        const imagePublicUrl = format(`https://storage.googleapis.com/${bucket.name}/${blob.name}`);
-        // gs link
-        const gsLink = `gs://${bucket.name}/${blob.name}`;
-        // res.status(200).send(publicUrl);
-
-        // Build the vision object
+        // console.log(req.file);
+        const imagePublicUrl = req.file.url;
         let visionObj = {};
         const visionImageFeatures =[{
             type:"FACE_DETECTION"
@@ -130,33 +126,94 @@ app.post("/file-upload", multer.single("file"), (req, res, next) => {
         }
         ];
         const request = {
-            image: {source: {imageUri: gsLink}},
+            image: {source: {imageUri: imagePublicUrl}},
             features: visionImageFeatures,
         };
         Vision.annotate(request).then(response => {
             // doThingsWith(response);
-            visionObj.cloudFileName = blob.name;
+            visionObj.cloudFileName = req.file.originalname;
             visionObj.imagePublicUrl = imagePublicUrl;
             visionObj.responses = response[1].responses;
             res.status(200).send(visionObj);
-            // then delete the file from the bucket because we no longer need it
-            //     storage
-            //         .bucket(bucket.name)
-            //         .file(blob.name)
-            //         .delete()
-            //         .then(() => {
-            //             console.log(`gs://${bucket.name}/${blob.name} deleted.`);
-            //         })
-            //         .catch((err) => {
-            //             console.error('ERROR:', err);
-            //         });
+
         }).catch(err => {
             console.error(err);
         });
     });
-
-    blobStream.end(req.file.buffer);
 });
+
+// Process the file upload and upload to Google Cloud Storage.
+// app.post("/file-upload", multer.single("file"), (req, res, next) => {
+//     if (!req.file) {
+//         res.status(400).send("No file uploaded.");
+//         return;
+//     }
+//
+//     // Create a new blob in the bucket and upload the file data.
+//     const blob = bucket.file(req.file.originalname);
+//     const blobStream = blob.createWriteStream();
+//
+//     blobStream.on("error", (err) => {
+//         next(err);
+//     });
+//
+//     blobStream.on("finish", () => {
+//         // The public URL can be used to directly access the file via HTTP.
+//         const imagePublicUrl = format(`https://storage.googleapis.com/${bucket.name}/${blob.name}`);
+//         // gs link
+//         const gsLink = `gs://${bucket.name}/${blob.name}`;
+//         // res.status(200).send(publicUrl);
+//
+//         // Build the vision object
+//         let visionObj = {};
+//         const visionImageFeatures =[{
+//             type:"FACE_DETECTION"
+//         },{
+//             type:"LANDMARK_DETECTION"
+//         },{
+//             type:"LOGO_DETECTION"
+//         },{
+//             type:"LABEL_DETECTION"
+//         },{
+//             type:"TEXT_DETECTION"
+//         },{
+//             type:"IMAGE_PROPERTIES"
+//         },{
+//             type:"CROP_HINTS"
+//         },{
+//             type:"WEB_DETECTION"
+//         },{
+//             type:"SAFE_SEARCH_DETECTION"
+//         }
+//         ];
+//         const request = {
+//             image: {source: {imageUri: gsLink}},
+//             features: visionImageFeatures,
+//         };
+//         Vision.annotate(request).then(response => {
+//             // doThingsWith(response);
+//             visionObj.cloudFileName = blob.name;
+//             visionObj.imagePublicUrl = imagePublicUrl;
+//             visionObj.responses = response[1].responses;
+//             res.status(200).send(visionObj);
+//             // then delete the file from the bucket because we no longer need it
+//             //     storage
+//             //         .bucket(bucket.name)
+//             //         .file(blob.name)
+//             //         .delete()
+//             //         .then(() => {
+//             //             console.log(`gs://${bucket.name}/${blob.name} deleted.`);
+//             //         })
+//             //         .catch((err) => {
+//             //             console.error('ERROR:', err);
+//             //         });
+//         }).catch(err => {
+//             console.error(err);
+//         });
+//     });
+//
+//     blobStream.end(req.file.buffer);
+// });
 
 // Production error handler
 if (app.get("env") === "production") {
