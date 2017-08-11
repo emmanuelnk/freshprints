@@ -49,13 +49,6 @@ const aboutController = require("./controllers/about");
 
 const app = express();
 
-
-// mongoose.connect("localhost" || process.env.MONGODB);
-// mongoose.connection.on('error', function() {
-//   console.log('MongoDB Connection Error. Please make sure that MongoDB is running.');
-//   process.exit(1);
-// });
-
 const hbs = exphbs.create({
     defaultLayout: "main",
     helpers: {
@@ -91,16 +84,6 @@ app.get("/about", aboutController.contactGet);
 app.post("/contact", contactController.contactPost);
 
 // app requests
-
-// app.post("/local-upload", multer.single("file"), function (req, res, next) {
-//     // console.log(req.file);
-//     if (!req.file.mimetype.startsWith("image/")) {
-//         return res.status(422).json({
-//             error: "The uploaded file must be an image"
-//         });
-//     }
-//     return res.status(200).send(req.file);
-// });
 
 // Process the file upload and upload to Google Cloud Storage.
 app.post("/file-upload", multer.single("file"), (req, res, next) => {
