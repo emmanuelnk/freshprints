@@ -12,7 +12,7 @@ Fresh Prints is a drap and drop image scanner. It leverages Google's Google Clou
 
 3. Voila!
 
-Check it out here: [Live Example](https://fresh-prints-image-analyzer.appspot.com/)
+Check it out here: [Live Example](https://freshprints.herokuapp.com/)
 
 #### Note: 
 No images are stored on our servers. They are immediately deleted after analysis.
